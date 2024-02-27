@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Admin\Resources\ProductResource\Pages;
+namespace App\Filament\User\Resources\User\ProductResource\Pages;
 
-use App\Filament\Admin\Resources\ProductResource;
+use App\Filament\User\Resources\User\ProductResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
@@ -13,8 +13,7 @@ class ListProducts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
-                ->label('เพิ่มอุปกรณ์'),
+            //
         ];
     }
 }

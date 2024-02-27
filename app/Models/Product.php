@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model implements HasMedia
 {
@@ -43,7 +44,7 @@ class Product extends Model implements HasMedia
      * @var array
      */
     protected $casts = [
-        'product_attr' => Json::class,
+        'product_attr' => 'json',
         // 'type' => ProductType::class,
         // 'status' => ProductStatus::class,
     ];
@@ -51,6 +52,11 @@ class Product extends Model implements HasMedia
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function borrowItem()
+    {
+        return $this->hasMany(BorrowItem::class);
     }
 
     // public function brand()

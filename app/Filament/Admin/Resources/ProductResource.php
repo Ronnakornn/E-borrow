@@ -18,9 +18,9 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationLabel = 'สินค้า';
+    protected static ?string $navigationLabel = 'อุปกรณ์';
 
-    protected static ?string $pluralModelLabel = 'สินค้า';
+    protected static ?string $pluralModelLabel = 'อุปกรณ์';
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
 
@@ -34,7 +34,7 @@ class ProductResource extends Resource
                             ->id('basic-information')
                             ->schema([
                                 Forms\Components\Select::make('category_id')
-                                    ->label('หมวดหมู่สินค้า')
+                                    ->label('หมวดหมู่อุปกรณ์')
                                     ->relationship(
                                         name: 'category',
                                         titleAttribute: 'name',
@@ -49,13 +49,13 @@ class ProductResource extends Resource
                             ->id('attributes')
                             ->schema([
                                 Forms\Components\TextInput::make('name')
-                                    ->label('ชื่อสินค้า')
+                                    ->label('ชื่ออุปกรณ์')
                                     ->maxLength(255)
                                     ->string()
                                     ->required()
                                     ->columnSpanFull(),
                                 Forms\Components\Textarea::make('description')
-                                    ->label('รายละเอียดสินค้า')
+                                    ->label('รายละเอียดอุปกรณ์')
                                     ->maxLength(1024)
                                     ->nullable()
                                     ->autosize()
@@ -73,7 +73,7 @@ class ProductResource extends Resource
                             ])
                             ->columns(3)
                             ->columnSpan(['lg' => 1]),
-                        Forms\Components\Section::make('รูปสินค้า')
+                        Forms\Components\Section::make('รูปอุปกรณ์')
                             ->id('images')
                             ->schema([
                                 Forms\Components\SpatieMediaLibraryFileUpload::make('product_img')
@@ -90,7 +90,7 @@ class ProductResource extends Resource
                                     ->collection('products')
                                     ->disk('media')
                             ]),
-                        Forms\Components\Section::make('สถานะสินค้า')
+                        Forms\Components\Section::make('สถานะอุปกรณ์')
                             ->id('status')
                             ->schema([
                                 Forms\Components\Toggle::make('status')
@@ -124,25 +124,25 @@ class ProductResource extends Resource
                                     ->step(0.01)
                                     ->required(),
                             ])->columns(6),
-                        Forms\Components\Section::make('ตัวบ่งชี้สินค้า')
+                        Forms\Components\Section::make('ตัวบ่งชี้อุปกรณ์')
                             ->id('identifiers')
                             ->schema([
                                 Forms\Components\TextInput::make('product_attr.sku')
-                                    ->label('รหัสสินค้า (SKU)')
+                                    ->label('รหัสอุปกรณ์ (SKU)')
                                     ->unique(column: 'products.product_attr->sku', ignoreRecord: true)
                                     ->maxLength(100)
                                     ->required(),
                             ]),
-                        Forms\Components\Section::make('สินค้าคงคลัง')
+                        Forms\Components\Section::make('อุปกรณ์คงคลัง')
                             ->id('inventory')
                             ->schema([
                                 Forms\Components\TextInput::make('amount')
-                                    ->label('จำนวนสินค้า')
+                                    ->label('จำนวนอุปกรณ์')
                                     ->numeric()
                                     ->minValue(0)
                                     ->required(),
                                 // Forms\Components\Select::make('type')
-                                //     ->label('ประเภทสินค้า')
+                                //     ->label('ประเภทอุปกรณ์')
                                 //     ->required()
                                 //     ->options(ProductType::class),
                             ])
@@ -161,21 +161,6 @@ class ProductResource extends Resource
 
                 Forms\Components\Group::make()
                     ->schema([
-                        Forms\Components\Section::make()
-                            ->schema([
-                                // \App\Forms\Components\NavSelect::make('category_id')
-                                //     ->hiddenLabel()
-                                //     ->options([
-                                //         'basic-information' => 'ข้อมูลพื้นฐาน',
-                                //         'attributes' => 'รายละเอียด',
-                                //         'images' => 'รูปสินค้า',
-                                //         'status' => 'สถานะสินค้า',
-                                //         'prices' => 'ราคา',
-                                //         'identifiers' => 'ตัวบ่งชี้สินค้า',
-                                //         'inventory' => 'สินค้าคงคลัง',
-                                //         'remarks' => 'หมายเหตุ',
-                                //     ])
-                            ]),
                         Forms\Components\Section::make()
                             ->schema([
                                 Forms\Components\Placeholder::make('created_at')

@@ -17,6 +17,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Jeffgreco13\FilamentBreezy\BreezyCore;
 
 class UserPanelProvider extends PanelProvider
 {
@@ -28,7 +29,12 @@ class UserPanelProvider extends PanelProvider
             ->path('user')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'danger' => Color::Rose,
+                'gray' => Color::Gray,
+                'info' => Color::Blue,
+                'primary' => Color::Indigo,
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
             ])
             ->discoverResources(in: app_path('Filament/User/Resources'), for: 'App\\Filament\\User\\Resources')
             ->discoverPages(in: app_path('Filament/User/Pages'), for: 'App\\Filament\\User\\Pages')
@@ -57,6 +63,11 @@ class UserPanelProvider extends PanelProvider
             ->renderHook( 
                 'panels::auth.login.form.after',
                 fn () => view('resources.views.auth.socialite.google')
+            ) ->plugin(
+                BreezyCore::make()
+                    ->myProfile()
+                    // ->customMyProfilePage(AccountSettingsPage::class),
+
             );
     }
 }

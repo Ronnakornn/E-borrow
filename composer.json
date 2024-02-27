@@ -12,6 +12,7 @@
         "filament/filament": "3.1",
         "filament/spatie-laravel-media-library-plugin": "3.1",
         "guzzlehttp/guzzle": "^7.2",
+        "jeffgreco13/filament-breezy": "^2.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/socialite": "^5.11",

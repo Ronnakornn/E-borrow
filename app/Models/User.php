@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -61,5 +62,15 @@ class User extends Authenticatable implements FilamentUser
         if ($panel->getId() === 'user') {
             return in_array($this->user_role, ['superAdmin', 'admin','customer']);
         }
+    }
+
+    /**
+     * Get all of the Order for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function Borrows()
+    {
+        return $this->hasMany(Borrow::class);
     }
 }
