@@ -25,6 +25,7 @@ class Borrow extends Model
         'name',
         'borrow_date',
         'borrow_date_return',
+        'status',
     ];
 
     protected $casts = [
@@ -42,7 +43,7 @@ class Borrow extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     /**
      * Get the borrowItems
      *
@@ -52,16 +53,17 @@ class Borrow extends Model
     {
         return $this->HasMany(BorrowItem::class);
     }
-    
+
     public function products()
     {
         return $this->belongsToMany(
             Product::class,
             BorrowItem::class,
             'borrow_id',
-            'product_id'
+            'product_id',
+            'product_name',
         )
-            ->withPivot('amount')
+            ->withPivot('amount', 'product_name')
             ->withTimestamps();
     }
 }

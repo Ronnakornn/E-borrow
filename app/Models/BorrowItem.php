@@ -11,8 +11,6 @@ class BorrowItem extends Model
 {
     use HasFactory;
 
-    // protected $with = ['product'];
-
     /**
      * The attributes that are mass assignable.
      *
@@ -22,6 +20,7 @@ class BorrowItem extends Model
         'borrow_id',
         'product_id',
         'amount',
+        'product_name'
     ];
 
     /**
@@ -33,9 +32,9 @@ class BorrowItem extends Model
     {
         return $this->belongsTo(Borrow::class);
     }
-    
+
    /**
-     * Get the Product 
+     * Get the Product
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */

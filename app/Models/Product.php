@@ -46,7 +46,7 @@ class Product extends Model implements HasMedia
     protected $casts = [
         'product_attr' => 'json',
         // 'type' => ProductType::class,
-        // 'status' => ProductStatus::class,
+        'status' => ProductStatus::class,
     ];
 
     public function category()

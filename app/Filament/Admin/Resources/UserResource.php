@@ -63,7 +63,7 @@ class UserResource extends Resource
                         Forms\Components\Section::make()
                             ->schema([
                                 Forms\Components\Placeholder::make('created_at')
-                                    ->label('สร้างเมื่อ')                                    
+                                    ->label('สร้างเมื่อ')
                                     ->content(fn (User $record): ?string => $record->created_at?->format('d/m/Y H:i:s').' ('.$record->created_at?->diffForHumans().')'),
 
                                 Forms\Components\Placeholder::make('updated_at')
@@ -109,6 +109,7 @@ class UserResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
                         ->label('ลบ'),
+                    Tables\Actions\ExportBulkAction::make('export')
 
                 ]),
             ]);

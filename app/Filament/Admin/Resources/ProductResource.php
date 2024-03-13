@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\ProductResource\Pages;
 use App\Models\Product;
+use App\Enums\ProductStatus;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -13,6 +14,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\Alignment;
+use Illuminate\Validation\Rules\Unique;
 
 class ProductResource extends Resource
 {
@@ -93,15 +95,17 @@ class ProductResource extends Resource
                         Forms\Components\Section::make('สถานะอุปกรณ์')
                             ->id('status')
                             ->schema([
-                                Forms\Components\Toggle::make('status')
+                                Forms\Components\ToggleButtons::make('status')
                                     ->label('เปิดการใช้งาน')
-                                    ->default(true)
+                                    ->inline()
                                     ->live()
-                                    ->onColor('success'),
+                                    ->options(ProductStatus::class)
+                                    ->required(),
                                 Forms\Components\Placeholder::make('status_description')
                                     ->hiddenLabel()
+                                    ->live()
                                     ->default(true)
-                                    ->content(fn (Get $get): string => $get('status') ? 'พร้อมให้บริการตลอดเวลา' : 'ไม่พร้อมให้บริการตลอดเวลา'),
+                                    ->content(fn (Get $get): string => $get('status') === 'enabled' ? 'พร้อมให้บริการตลอดเวลา' : 'ไม่พร้อมให้บริการตลอดเวลา'),
                             ])
                             ->columns(2),
                         Forms\Components\Section::make('ราคา')
@@ -129,7 +133,9 @@ class ProductResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('product_attr.sku')
                                     ->label('รหัสอุปกรณ์ (SKU)')
-                                    ->unique(column: 'products.product_attr->sku', ignoreRecord: true)
+                                    ->unique(column: 'products.product_attr->sku', ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
+                                        return $rule->withoutTrashed();
+                                    })
                                     ->maxLength(100)
                                     ->required(),
                             ]),

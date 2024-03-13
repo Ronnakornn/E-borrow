@@ -18,8 +18,14 @@ class CreateBorrow extends CreateRecord
     {
         $borrow_date_return = Carbon::parse($data['borrow_date']);
         $borrow_date_return->setTime(17, 0);
-
         $borrowNumber = $this->generateNumber();
+
+        $productAmount = $data['borrowItems']->pluck('product_id', 'amount');
+
+        foreach ($productAmount as $key => $value) {
+            $product = Product::where('id', $key)->decrement('amount', $value);
+        }
+
         Arr::set($data, 'borrow_number', $borrowNumber);
         Arr::set($data, 'borrow_date_return', $borrow_date_return->toDateTimeString());
         Arr::set($data, 'user_id', auth()->user()->id);
@@ -27,25 +33,25 @@ class CreateBorrow extends CreateRecord
         return $data;
     }
 
-    protected function beforeCreate()
-    {
-        return false;
-    }
+    // protected function beforeCreate()
+    // {
+    //     return false;
+    // }
 
-    protected function afterCreate(): void
-    {
-        $bookingNumber = $this->getRecord();
+    // protected function afterCreate(): void
+    // {
+    //     $bookingNumber = $this->getRecord();
 
-        $bookingNumber->borrowItems->map(function (string $value) {
-            $item = json_decode($value);
-            $product = Product::where('id', '=',  $item->product_id)->first();
-            $stock = $product->amount-$item->amount;
-            if($stock >= 0){
-                $product->amount = $stock;
-                $product->save();
-            }
-        });
-    }
+    //     $bookingNumber->borrowItems->map(function (string $value) {
+    //         $item = json_decode($value);
+    //         $product = Product::where('id', '=',  $item->product_id)->first();
+    //         $stock = $product->amount-$item->amount;
+    //         if($stock >= 0){
+    //             $product->amount = $stock;
+    //             $product->save();
+    //         }
+    //     });
+    // }
 
     protected function generateNumber(){
         $currentDate = Carbon::now()->format('ymd');

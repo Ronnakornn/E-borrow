@@ -2,12 +2,15 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\Utilities;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
 
 enum BorrowStatus: string implements HasLabel, HasColor, HasIcon
 {
+    use Utilities;
+
     case Pending = 'pending';
     case Confirmed = 'confirmed';
     case Canceled = 'canceled';

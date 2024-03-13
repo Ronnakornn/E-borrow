@@ -18,21 +18,33 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
+use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
+use Swis\Filament\Backgrounds\ImageProviders\MyImages;
 
 class UserPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->plugins([
+                FilamentBackgroundsPlugin::make()
+                    ->imageProvider(
+                        MyImages::make()
+                            ->directory('\images\backgrounds')
+                    ),
+            ])
             ->default()
             ->id('user')
             ->path('user')
             ->login()
+            ->passwordReset()
+            ->emailVerification()
+            ->profile()
             ->colors([
                 'danger' => Color::Rose,
                 'gray' => Color::Gray,
                 'info' => Color::Blue,
-                'primary' => Color::Indigo,
+                'primary' => Color::Yellow,
                 'success' => Color::Emerald,
                 'warning' => Color::Orange,
             ])
@@ -60,7 +72,7 @@ class UserPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->renderHook( 
+            ->renderHook(
                 'panels::auth.login.form.after',
                 fn () => view('resources.views.auth.socialite.google')
             ) ->plugin(
