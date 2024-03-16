@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->longText('borrow_number')->comment('เลขการยืม');
             $table->longText('note')->nullable();
-            $table->dateTime('borrow_date')->comment('วันที่ยืม');
+            $table->date('borrow_date')->comment('วันที่ยืม');
             $table->dateTime('borrow_date_return')->comment('วันที่คืน');
             $table->enum('status', ['pending', 'confirmed', 'canceled', 'returned'])->default('pending')->comment('สถานะการยืม');
 

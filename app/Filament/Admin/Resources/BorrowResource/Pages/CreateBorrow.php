@@ -17,13 +17,6 @@ class CreateBorrow extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // dd($data);
-        $productAmount = collect($data['borrowItems'])->pluck('product_id', 'amount')->toArray();
-
-        foreach ($productAmount as $key => $value) {
-            $product = Product::where('id', $value)->decrement('amount', $key);
-        }
-
         $borrow_date_return = Carbon::parse($data['borrow_date']);
         $borrow_date_return->setTime(17, 0);
 
@@ -33,7 +26,6 @@ class CreateBorrow extends CreateRecord
 
         return $data;
     }
-
 
     protected function generateNumber(){
         $currentDate = Carbon::now()->format('ymd');

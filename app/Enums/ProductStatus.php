@@ -11,30 +11,34 @@ enum ProductStatus: string implements HasLabel, HasColor, HasIcon
 {
     use Utilities;
 
-    case Enable = 'enable';
-    case Disable = 'disable';
+    case Ready = 'ready';
+    case Borrow = 'borrow';
+    case Damaged = 'bamaged';
 
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Enable => 'เปิดใช้งาน',
-            self::Disable => 'ปิดใช้งาน',
+            self::Ready => 'พร้อมใช้',
+            self::Borrow => 'ยืม',
+            self::Damaged => 'ชำรุด',
         };
     }
 
     public function getColor(): string | array | null
     {
         return match ($this) {
-            self::Enable => 'success',
-            self::Disable => 'danger',
+            self::Ready => 'success',
+            self::Borrow => 'warning',
+            self::Damaged => 'danger',
         };
     }
 
     public function getIcon(): ?string
     {
         return match ($this) {
-            self::Enable => 'heroicon-o-check-circle',
-            self::Disable => 'heroicon-o-x-circle',
+            self::Ready => 'heroicon-o-check-circle',
+            self::Borrow => 'heroicon-o-arrow-path',
+            self::Damaged => 'heroicon-o-x-circle',
         };
     }
 }

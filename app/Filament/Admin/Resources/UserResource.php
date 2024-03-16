@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Enums\UserPosition;
 use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
@@ -39,6 +40,10 @@ class UserResource extends Resource
                             ->label(('อีเมล'))
                             ->regex('/^[\w\.-]+@[\w\.-]+\.\w+$/')
                             ->unique(ignorable: fn ($record) => $record)
+                            ->required(),
+                        Forms\Components\Select::make('position')
+                            ->label(('สถานะ'))
+                            ->options(UserPosition::class)
                             ->required(),
                         Forms\Components\TextInput::make('password')
                             ->label('รหัส')
@@ -90,6 +95,10 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->label(('อีเมล'))
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('position')
+                    ->label('สถานะ')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

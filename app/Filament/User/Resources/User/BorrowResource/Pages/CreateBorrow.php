@@ -20,11 +20,11 @@ class CreateBorrow extends CreateRecord
         $borrow_date_return->setTime(17, 0);
         $borrowNumber = $this->generateNumber();
 
-        $productAmount = $data['borrowItems']->pluck('product_id', 'amount');
+        // $productAmount = $data['borrowItems']->pluck('product_id', 'amount');
 
-        foreach ($productAmount as $key => $value) {
-            $product = Product::where('id', $key)->decrement('amount', $value);
-        }
+        // foreach ($productAmount as $key => $value) {
+        //     $product = Product::where('id', $key)->decrement('amount', $value);
+        // }
 
         Arr::set($data, 'borrow_number', $borrowNumber);
         Arr::set($data, 'borrow_date_return', $borrow_date_return->toDateTimeString());

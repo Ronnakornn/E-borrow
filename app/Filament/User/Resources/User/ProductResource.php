@@ -16,6 +16,11 @@ use Filament\Support\Enums\Alignment;
 use Filament\Forms\Get;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components;
+use Filament\Support\Enums\FontWeight;
+use Filament\Infolists;
+use Illuminate\Support\Arr;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class ProductResource extends Resource
 {
@@ -107,49 +112,49 @@ class ProductResource extends Resource
                                 ->content(fn (Get $get): string => $get('status') ? 'พร้อมให้บริการตลอดเวลา' : 'ไม่พร้อมให้บริการตลอดเวลา'),
                         ])
                         ->columns(2),
-                    Forms\Components\Section::make('ราคา')
-                        ->id('prices')
-                        ->schema([
-                            Forms\Components\TextInput::make('product_attr.price_ex_vat')
-                                ->label('ราคาไม่รวมภาษี')
-                                ->suffix('บาท')
-                                ->numeric()
-                                ->columnSpan(['lg' => 3])
-                                ->minValue(0)
-                                ->step(0.01)
-                                ->required(),
-                            Forms\Components\TextInput::make('product_attr.price')
-                                ->label('ราคารวมภาษี')
-                                ->suffix('บาท')
-                                ->numeric()
-                                ->columnSpan(['lg' => 3])
-                                ->minValue(0)
-                                ->step(0.01)
-                                ->required(),
-                        ])->columns(6),
+                    // Forms\Components\Section::make('ราคา')
+                    //     ->id('prices')
+                    //     ->schema([
+                    //         Forms\Components\TextInput::make('product_attr.price_ex_vat')
+                    //             ->label('ราคาไม่รวมภาษี')
+                    //             ->suffix('บาท')
+                    //             ->numeric()
+                    //             ->columnSpan(['lg' => 3])
+                    //             ->minValue(0)
+                    //             ->step(0.01)
+                    //             ->required(),
+                    //         Forms\Components\TextInput::make('product_attr.price')
+                    //             ->label('ราคารวมภาษี')
+                    //             ->suffix('บาท')
+                    //             ->numeric()
+                    //             ->columnSpan(['lg' => 3])
+                    //             ->minValue(0)
+                    //             ->step(0.01)
+                    //             ->required(),
+                    //     ])->columns(6),
                     Forms\Components\Section::make('ตัวบ่งชี้อุปกรณ์')
                         ->id('identifiers')
                         ->schema([
                             Forms\Components\TextInput::make('product_attr.sku')
-                                ->label('รหัสอุปกรณ์ (SKU)')
+                                ->label('เลขคุรุภัณฑ์')
                                 ->unique(column: 'products.product_attr->sku', ignoreRecord: true)
                                 ->maxLength(100)
                                 ->required(),
                         ]),
-                    Forms\Components\Section::make('อุปกรณ์คงคลัง')
-                        ->id('inventory')
-                        ->schema([
-                            Forms\Components\TextInput::make('amount')
-                                ->label('จำนวนอุปกรณ์')
-                                ->numeric()
-                                ->minValue(0)
-                                ->required(),
-                            // Forms\Components\Select::make('type')
-                            //     ->label('ประเภทอุปกรณ์')
-                            //     ->required()
-                            //     ->options(ProductType::class),
-                        ])
-                        ->columns(2),
+                    // Forms\Components\Section::make('อุปกรณ์คงคลัง')
+                    //     ->id('inventory')
+                    //     ->schema([
+                    //         Forms\Components\TextInput::make('amount')
+                    //             ->label('จำนวนอุปกรณ์')
+                    //             ->numeric()
+                    //             ->minValue(0)
+                    //             ->required(),
+                    //         // Forms\Components\Select::make('type')
+                    //         //     ->label('ประเภทอุปกรณ์')
+                    //         //     ->required()
+                    //         //     ->options(ProductType::class),
+                    //     ])
+                    //     ->columns(2),
                     Forms\Components\Section::make('หมายเหตุ')
                         ->id('remarks')
                         ->schema([
@@ -161,29 +166,6 @@ class ProductResource extends Resource
                                 ->columnSpanFull(),
                         ]),
                 ])->columnSpan(['lg' => 2]),
-
-            Forms\Components\Group::make()
-                ->schema([
-                    Forms\Components\Section::make()
-                        ->schema([
-                            Forms\Components\Placeholder::make('created_at')
-                                ->label('สร้างเมื่อ')
-                                ->content(fn (Product $record): ?string => $record->created_at?->format('d/m/Y H:i:s') . ' (' . $record->created_at?->diffForHumans() . ')'),
-
-                            Forms\Components\Placeholder::make('updated_at')
-                                ->label('แก้ไขล่าสุดเมื่อ')
-                                ->content(fn (Product $record): ?string => $record->updated_at?->format('d/m/Y H:i:s') . ' (' . $record->updated_at?->diffForHumans() . ')'),
-                        ])
-                        ->columnSpan(['lg' => 1])
-                        ->hidden(fn (?Product $record) => $record === null),
-                ])
-                ->extraAttributes([
-                    'class' => 'sticky',
-                    'style' => 'top: 5.5rem',
-                ])
-        ])->columns([
-            'sm' => null,
-            'lg' => 3,
         ]);
     }
 
@@ -208,27 +190,33 @@ class ProductResource extends Resource
                     ->searchable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('product_attr.sku')
-                    ->label('SKU')
+                    ->label('เลขคุรุภัณฑ์')
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
                             ->orderBy('product_attr->sku', $direction);
                     })
                     ->searchable('product_attr->sku')
                     ->alignment(Alignment::Center),
-                Tables\Columns\TextColumn::make('product_attr.price')
-                    ->label('ราคา')
-                    ->money('THB')
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        return $query
-                            ->orderBy('product_attr->price', $direction);
-                    })
-                    ->searchable('product_attr->price')
-                    ->alignment(Alignment::End),
-                Tables\Columns\TextColumn::make('amount')
-                    ->label('จํานวน')
+                Tables\Columns\TextColumn::make('description')
+                    ->label('รายละเอียด')
                     ->sortable()
                     ->searchable()
-                    ->alignment(Alignment::Center),
+                    ->wrap(),
+
+                // Tables\Columns\TextColumn::make('product_attr.price')
+                //     ->label('ราคา')
+                //     ->money('THB')
+                //     ->sortable(query: function (Builder $query, string $direction): Builder {
+                //         return $query
+                //             ->orderBy('product_attr->price', $direction);
+                //     })
+                //     ->searchable('product_attr->price')
+                //     ->alignment(Alignment::End),
+                // Tables\Columns\TextColumn::make('amount')
+                //     ->label('จํานวน')
+                //     ->sortable()
+                //     ->searchable()
+                //     ->alignment(Alignment::Center),
                 // Tables\Columns\TextColumn::make('type')
                 //     ->label('ประเภท')
                 //     ->badge()
@@ -253,25 +241,45 @@ class ProductResource extends Resource
             ]);
     }
 
-    // public static  function infolist(Infolist $infolist): Infolist
-    // {
-    //     return $infolist
-    //         ->schema([
-    //             Components\ImageEntry::make('product.product_img')
-    //             ->limit(1)
-    //             ->hiddenLabel()
-    //             ->getStateUsing(static function (Product $record): ?string {
-    //                 return $record->getFirstMediaUrl('products', 'products');
-    //             })
-    //             ->height('auto')
-    //             ->width('100%')
-    //             ->square()
-    //             ->alignment(Alignment::Center)
-    //             ->extraImgAttributes([
-    //                 'class' => 'rounded',
-    //             ]),
-    //         ]);
-    // }
+    public static  function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Group::make([
+                    Infolists\Components\Section::make('อุปกรณ์')
+                    ->schema([
+                        Components\ImageEntry::make('product.product_img')
+                            ->limit(1)
+                            ->hiddenLabel()
+                            ->defaultImageUrl(static function (Product $record): ?string {
+                                return $record->getFirstMediaUrl('products', 'products');
+                            })
+                            ->height('15rem')
+                            ->width('15rem')
+                            ->square()
+                            ->extraImgAttributes([
+                                'class' => 'rounded',
+                            ]),
+                            Infolists\Components\Section::make('รายละเอียดอุปกรณ์')
+                                ->schema([
+                                    Infolists\Components\TextEntry::make('name')
+                                        ->label('ชื่อสินค้า')
+                                        ->weight(FontWeight::Bold)
+                                        ->limit(30),
+                                    Infolists\Components\TextEntry::make('product_attr.sku')
+                                        ->label('เลขคุรุภัณฑ์')
+                                        ->weight(FontWeight::Bold)
+                                        ->limit(30),
+                                    Infolists\Components\TextEntry::make('description')
+                                        ->label('รายละเอียด'),
+                                    Infolists\Components\TextEntry::make('remark')
+                                        ->label('หมายเหตุ')
+                                        ->limit(30)
+                                ])->columns(2),
+                    ])->columns(3)
+                ])->columnSpanFull(),
+            ]);
+    }
 
     public static function getRelations(): array
     {
@@ -286,7 +294,7 @@ class ProductResource extends Resource
             'index' => Pages\ListProducts::route('/'),
             'create' => Pages\CreateProduct::route('/create'),
             'view' => Pages\ViewProduct::route('/{record}'),
-            'edit' => Pages\EditProduct::route('/{record}/edit'),
+            // 'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
     }
 }

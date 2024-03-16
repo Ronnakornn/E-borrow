@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::disableForeignKeyConstraints();
-        
+
         Schema::create('borrow_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('borrow_id')->constrained( table: 'borrows')->cascadeOnDelete()->comment('ไอดีการยืม');
-            $table->foreignId('product_id')->constrained()->nullable()->comment('ไอดีผู้ใช้');     
-            $table->string('product_name', 100)->nullable();       
-            $table->integer('amount')->unsigned()->comment('จำนวน');
+            $table->foreignId('product_id')->constrained()->nullable()->comment('ไอดีผู้ใช้');
+            $table->string('product_name', 100)->nullable();
+            $table->integer('amount')->nullable()->unsigned()->comment('จำนวน');
             $table->timestamps();
         });
 

@@ -13,6 +13,8 @@ class Borrow extends Model
 {
     use HasFactory;
 
+    protected $with = ['user', 'borrowItems'];
+
      /**
      * The attributes that are mass assignable.
      *
@@ -33,6 +35,28 @@ class Borrow extends Model
         'borrow_date_return' => 'datetime',
         'status' => BorrowStatus::class
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleted(function ($model) {
+            $productId = $model->borrowItems->pluck('product_id');
+            Product::whereIn('id', $productId)->update(['status' => 'ready']);
+        });
+
+        static::updated(function ($model) {
+            $status = $model->status;
+            $productId = $model->borrowItems->pluck('product_id')->toArray();
+
+            if ($status == BorrowStatus::Returned || $status == BorrowStatus::Canceled) {
+                Product::whereIn('id', $productId)->update(['status' => 'ready']);
+            } else if($status == BorrowStatus::Pending || $status == BorrowStatus::Confirmed) {
+                Product::whereIn('id', $productId)->update(['status' => 'borrow']);
+            }
+        });
+
+    }
 
     /**
      * Get the user

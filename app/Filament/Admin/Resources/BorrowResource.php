@@ -20,6 +20,7 @@ use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use pxlrbt\FilamentExcel\Columns\Column;
+use Filament\Support\Enums\Alignment;
 
 class BorrowResource extends Resource
 {
@@ -72,7 +73,7 @@ class BorrowResource extends Resource
                     ->native(false)
                     ->optionsLimit(20)
                     ->required(),
-                Forms\Components\DateTimePicker::make('borrow_date')
+                Forms\Components\DatePicker::make('borrow_date')
                     ->label('วันที่ยืม')
                     ->seconds(false)
                     ->live(onBlur: true)
@@ -87,6 +88,9 @@ class BorrowResource extends Resource
                     ->disabled()
                     ->live(onBlur: true)
                     ->seconds(false),
+                Forms\Components\Textarea::make('note')
+                    ->label('หมายเหตุ')
+                    ->columnSpan(2),
             ])->columns(2),
             Forms\Components\Section::make('ข้อมูลอุปกรณ์')
             ->id('product-information')
@@ -99,13 +103,8 @@ class BorrowResource extends Resource
                             ->label('อุปกรณ์')
                             ->relationship('product', 'name')
                             ->options(function () {
-                                return Product::where('status', 'enable')->where('amount', '>', '0')
+                                return Product::where('status', 'ready')
                                     ->limit(20)
-                                    ->get()
-                                    ->pluck('name', 'id');
-                            })
-                            ->options(function () {
-                                return Product::limit(20)->where('amount', '>', '0')
                                     ->get()
                                     ->pluck('name', 'id');
                             })
@@ -115,32 +114,31 @@ class BorrowResource extends Resource
                             ->getSearchResultsUsing(function (string $search) {
                                 return Product::where('product_attr->sku', 'like', "%{$search}%")
                                     ->orWhere('name', 'like', "%{$search}%")
-                                    ->where('status', 'enable')
-                                    ->where('amount', '>', 0)
+                                    ->where('status', 'ready')
                                     ->limit(50)
                                     ->get()
                                     ->pluck('name', 'id');
                             })
                             ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
-                        Forms\Components\TextInput::make('amount')
-                            ->label('จำนวน')
-                            ->numeric()
-                            ->step(1)
-                            ->minValue(1)
-                            ->default(1)
-                            ->required(),
+                        // Forms\Components\TextInput::make('amount')
+                        //     ->label('จำนวน')
+                        //     ->numeric()
+                        //     ->step(1)
+                        //     ->minValue(1)
+                        //     ->default(1)
+                        //     ->required(),
                     ])
                     ->disabled( fn ($context) => $context === 'edit' )
-                    ->columns(2)
             ])->columns(['lg' => 'full']),
-            Forms\Components\Section::make('ข้อมูลอุปกรณ์')
+            Forms\Components\Section::make('สถานะการยืม')
                 ->schema([
                     Forms\Components\ToggleButtons::make('status')
                         ->label('สถานะ')
                         ->inline()
                         ->options(BorrowStatus::class)
+                        ->hidden(fn ($context ) => $context === 'create')
                         ->required(),
-                ])
+                ])->hidden(fn ($context ) => $context === 'create')
         ]);
     }
 
@@ -220,13 +218,6 @@ class BorrowResource extends Resource
                 Tables\Actions\DeleteAction::make()
                     ->label('ลบ')
                     ->hidden(fn ($record) => $record->status->value != 'pending')
-                    ->before(function ($record) {
-                       $productAmount = $record->products->pluck('product_id', 'amount');
-
-                       foreach ($productAmount as $key => $value) {
-                           $product = Product::where('id', $key)->increment('amount', $value);
-                       }
-                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -234,8 +225,14 @@ class BorrowResource extends Resource
                         ExcelExport::make()->withColumns([
                             Column::make('borrow_number')->heading('รหัสการยืม'),
                             Column::make('user.name')->heading('ผู้ยืม'),
-                            Column::make('borrow_number')->heading('จำนวน')
-                                ->formatStateUsing(fn ($record) => dd($record)),
+                            Column::make('product')->heading('อุปกรณ์')
+                                ->getStateUsing(function ($record) {
+                                    $productName = $record->borrowItems->pluck('product.name')->toArray();
+                                    $productName = implode(', ', array_values($productName));
+
+                                    return $productName;
+                                }),
+                            Column::make('note')->heading('หมายเหตุ'),
                             Column::make('borrow_date')->heading('วันที่ยืม'),
                             Column::make('borrow_date_return')->heading('กำหนดคืน'),
                             Column::make('status')->heading('สถานะ'),

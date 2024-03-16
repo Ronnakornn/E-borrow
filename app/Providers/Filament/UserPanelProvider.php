@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\User\Pages\EditProfile;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -20,6 +21,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
 use Swis\Filament\Backgrounds\FilamentBackgroundsPlugin;
 use Swis\Filament\Backgrounds\ImageProviders\MyImages;
+use Filament\Navigation\MenuItem;
 
 class UserPanelProvider extends PanelProvider
 {
@@ -40,6 +42,9 @@ class UserPanelProvider extends PanelProvider
             ->passwordReset()
             ->emailVerification()
             ->profile()
+            ->userMenuItems([
+                'profile' => MenuItem::make()->url(fn (): string => EditProfile::getUrl()),
+            ])
             ->colors([
                 'danger' => Color::Rose,
                 'gray' => Color::Gray,
@@ -51,12 +56,12 @@ class UserPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/User/Resources'), for: 'App\\Filament\\User\\Resources')
             ->discoverPages(in: app_path('Filament/User/Pages'), for: 'App\\Filament\\User\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                // Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/User/Widgets'), for: 'App\\Filament\\User\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -75,11 +80,12 @@ class UserPanelProvider extends PanelProvider
             ->renderHook(
                 'panels::auth.login.form.after',
                 fn () => view('resources.views.auth.socialite.google')
-            ) ->plugin(
-                BreezyCore::make()
-                    ->myProfile()
-                    // ->customMyProfilePage(AccountSettingsPage::class),
-
             );
+            // ->plugin(
+            //     BreezyCore::make()
+            //         ->myProfile()
+            //         // ->customMyProfilePage(AccountSettingsPage::class),
+
+            // );
     }
 }

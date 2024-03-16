@@ -15,6 +15,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Validation\Rules\Unique;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Columns\Column;
 
 class ProductResource extends Resource
 {
@@ -132,27 +136,27 @@ class ProductResource extends Resource
                             ->id('identifiers')
                             ->schema([
                                 Forms\Components\TextInput::make('product_attr.sku')
-                                    ->label('รหัสอุปกรณ์ (SKU)')
+                                    ->label('เลขคุรุภัณฑ์')
                                     ->unique(column: 'products.product_attr->sku', ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
                                         return $rule->withoutTrashed();
                                     })
                                     ->maxLength(100)
                                     ->required(),
                             ]),
-                        Forms\Components\Section::make('อุปกรณ์คงคลัง')
-                            ->id('inventory')
-                            ->schema([
-                                Forms\Components\TextInput::make('amount')
-                                    ->label('จำนวนอุปกรณ์')
-                                    ->numeric()
-                                    ->minValue(0)
-                                    ->required(),
-                                // Forms\Components\Select::make('type')
-                                //     ->label('ประเภทอุปกรณ์')
-                                //     ->required()
-                                //     ->options(ProductType::class),
-                            ])
-                            ->columns(2),
+                        // Forms\Components\Section::make('อุปกรณ์คงคลัง')
+                        //     ->id('inventory')
+                        //     ->schema([
+                        //         Forms\Components\TextInput::make('amount')
+                        //             ->label('จำนวนอุปกรณ์')
+                        //             ->numeric()
+                        //             ->minValue(0)
+                        //             ->required(),
+                        //         // Forms\Components\Select::make('type')
+                        //         //     ->label('ประเภทอุปกรณ์')
+                        //         //     ->required()
+                        //         //     ->options(ProductType::class),
+                        //     ])
+                        //     ->columns(2),
                         Forms\Components\Section::make('หมายเหตุ')
                             ->id('remarks')
                             ->schema([
@@ -206,12 +210,12 @@ class ProductResource extends Resource
                         'class' => 'rounded',
                     ]),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('ชื่อ')
+                    ->label('ชื่ออุปกรณ์')
                     ->sortable()
                     ->searchable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('product_attr.sku')
-                    ->label('SKU')
+                    ->label('เลขคุรุภัณฑ์')
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
                             ->orderBy('product_attr->sku', $direction);
@@ -227,11 +231,11 @@ class ProductResource extends Resource
                     })
                     ->searchable('product_attr->price')
                     ->alignment(Alignment::End),
-                Tables\Columns\TextColumn::make('amount')
-                    ->label('จํานวน')
-                    ->sortable()
-                    ->searchable()
-                    ->alignment(Alignment::Center),
+                // Tables\Columns\TextColumn::make('amount')
+                //     ->label('จํานวน')
+                //     ->sortable()
+                //     ->searchable()
+                //     ->alignment(Alignment::Center),
                 // Tables\Columns\TextColumn::make('type')
                 //     ->label('ประเภท')
                 //     ->badge()
@@ -271,8 +275,16 @@ class ProductResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    ExportBulkAction::make('export')->exports([
+                        ExcelExport::make()->withColumns([
+                            Column::make('product_attr.sku')->heading('เลขคุรุภัณฑ์'),
+                            Column::make('name')->heading('อุปกรณ์'),
+                            Column::make('status')->heading('สถานะ'),
+                            Column::make('created_at')->heading('สร้างเมื่อ'),
+                        ])
+                    ]),
                     Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                ])
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),

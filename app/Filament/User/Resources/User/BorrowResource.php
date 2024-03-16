@@ -5,7 +5,9 @@ namespace App\Filament\User\Resources\User;
 use App\Filament\User\Resources\User\BorrowResource\Pages;
 use App\Filament\User\Resources\User\BorrowResource\RelationManagers;
 use App\Models\Borrow;
+use App\Models\BorrowItem;
 use App\Models\Product;
+use App\Enums\BorrowStatus;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -15,13 +17,19 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Carbon\Carbon;
 use Filament\Support\Enums\FontWeight;
+use Filament\Infolists\Infolist;
+use Filament\Infolists;
+use Illuminate\Support\Arr;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
+
 
 class BorrowResource extends Resource
 {
     protected static ?string $model = Borrow::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-newspaper';
-    
+
     protected static ?string $navigationLabel = 'รายการการยืม';
 
     protected static ?string $pluralModelLabel = 'รายการการยืม';
@@ -59,7 +67,7 @@ class BorrowResource extends Resource
                     ->disabled()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\DateTimePicker::make('borrow_date')
+                Forms\Components\DatePicker::make('borrow_date')
                     ->label('วันที่ยืม')
                     ->seconds(false)
                     ->live(onBlur: true)
@@ -74,6 +82,9 @@ class BorrowResource extends Resource
                     ->disabled()
                     ->live(onBlur: true)
                     ->seconds(false),
+                Forms\Components\Textarea::make('note')
+                    ->label('หมายเหตุ')
+                    ->columnSpan(2),
             ])->columns(2),
             Forms\Components\Section::make('ข้อมูลอุปกรณ์')
             ->id('product-information')
@@ -86,13 +97,13 @@ class BorrowResource extends Resource
                             ->label('อุปกรณ์')
                             ->relationship('product', 'name')
                             ->options(function () {
-                                return Product::where('status', 'enable')->where('amount', '>', '0')
+                                return Product::where('status', 'enable')
                                     ->limit(20)
                                     ->get()
                                     ->pluck('name', 'id');
                             })
                             ->options(function () {
-                                return Product::limit(20)->where('amount', '>', '0')
+                                return Product::limit(20)
                                     ->get()
                                     ->pluck('name', 'id');
                             })
@@ -103,20 +114,19 @@ class BorrowResource extends Resource
                                 return Product::where('product_attr->sku', 'like', "%{$search}%")
                                     ->orWhere('name', 'like', "%{$search}%")
                                     ->where('status', 'enable')
-                                    ->where('amount', '>', 0)
                                     ->limit(50)
                                     ->get()
                                     ->pluck('name', 'id');
                             })
                             ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
-                        Forms\Components\TextInput::make('amount')
-                            ->label('จำนวน')
-                            ->numeric()
-                            ->step(1)
-                            ->minValue(1)
-                            ->default(1)
-                            ->required(),
-                    ])->columns(2)
+                        // Forms\Components\TextInput::make('amount')
+                        //     ->label('จำนวน')
+                        //     ->numeric()
+                        //     ->step(1)
+                        //     ->minValue(1)
+                        //     ->default(1)
+                        //     ->required(),
+                    ])
             ])->columns(['lg' => 'full']),
         ]);
     }
@@ -154,18 +164,82 @@ class BorrowResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\DeleteAction::make()
                     ->label('ลบ')
                     ->hidden(fn ($record) => $record->status->value != 'pending')
-                    ->before(function ($record) {
-                       $productAmount = $record->borrowItems->pluck('product_id', 'amount');
-
-                       foreach ($productAmount as $key => $value) {
-                           $product = Product::where('id', $key)->increment('amount', $value);
-                       }
-                    }),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Group::make([
+                    Infolists\Components\Section::make('รายการอุปกรณ์')
+                        ->schema([
+                            Infolists\Components\RepeatableEntry::make('borrowItems')
+                                ->label('รายการอุปกรณ์')
+                                ->hiddenLabel()
+                                ->contained(false)
+                                ->schema([
+                                    Infolists\Components\ImageEntry::make('image')
+                                        ->limit(1)
+                                        ->hiddenLabel()
+                                        // ->getStateUsing(static function (BorrowItem $record): ?string {
+                                        //     dd($record->product->getFirstMediaUrl('products', 'mobile'));
+                                        //     return $record->product->getFirstMediaUrl('products', 'mobile');
+                                        // })
+                                        ->defaultImageUrl(
+                                            static function (BorrowItem $record): ?string {
+                                                return $record->product->getFirstMediaUrl('products', 'mobile');
+                                            }
+                                        )
+                                        ->height('8rem')
+                                        ->width('8rem')
+                                        ->square()
+                                        ->extraImgAttributes([
+                                            'class' => 'rounded',
+                                        ]),
+                                    Infolists\Components\TextEntry::make('product.name')
+                                        ->label('ชื่อสินค้า')
+                                        ->hiddenLabel()
+                                        ->weight(FontWeight::Bold)
+                                        ->helperText(function (BorrowItem $record) {
+                                            return new HtmlString(Arr::get($record->product->product_attr, 'sku'));
+                                        })
+                                        ->limit(30)
+                                        ->columnSpan(['default' => 2, 'sm' => 4]),
+                                ])
+                                ->columns(['default' => 6, 'sm' => 5])
+                        ])
+                        ->columnSpan(['lg' => 1]),
+                ])
+                    ->columnSpan(['lg' => 2]),
+                Infolists\Components\Group::make([
+                    Infolists\Components\Section::make('ข้อมูลการยืม')
+                        ->schema([
+                            Infolists\Components\TextEntry::make('status')
+                                ->label('สถานะ')
+                                ->badge(),
+                            Infolists\Components\TextEntry::make('borrow_number')
+                                ->label('รหัสการยืม')
+                                ->copyable(),
+                            Infolists\Components\TextEntry::make('borrow_date')
+                                ->label('วันที่ยืม'),
+                            Infolists\Components\TextEntry::make('borrow_date_return')
+                                ->label('กำหนดคืน'),
+                        ]),
+                    Infolists\Components\Section::make([
+                        Infolists\Components\TextEntry::make('created_at')
+                            ->label('สร้างเมื่อ'),
+                        Infolists\Components\TextEntry::make('updated_at')
+                            ->label('แก้ไขเมื่อ'),
+                    ])
+                ])
+                    ->columnSpan(['lg' => 1]),
+            ])
+            ->columns(3);
     }
 
     public static function getRelations(): array

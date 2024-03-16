@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('warranty', 100)->nullable();
             $table->longText('remark')->nullable();
             $table->enum('type', ['instock', 'preorder']);
-            $table->enum('status', ['enable', 'disable']);
+            $table->enum('status', ['ready','borrow','bamaged']);
             $table->softDeletes();
             $table->timestamps();
         });
