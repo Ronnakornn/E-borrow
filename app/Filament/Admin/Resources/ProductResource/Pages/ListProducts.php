@@ -22,6 +22,7 @@ class ListProducts extends ListRecords
     {
         return [
             Actions\ImportAction::make()
+                ->label('นำเข้าไฟล์')
                 ->importer(ProductImporter::class)
                 ->chunkSize(50),
             Actions\CreateAction::make()
