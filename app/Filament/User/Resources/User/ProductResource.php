@@ -136,7 +136,7 @@ class ProductResource extends Resource
                         ->id('identifiers')
                         ->schema([
                             Forms\Components\TextInput::make('product_attr.sku')
-                                ->label('เลขคุรุภัณฑ์')
+                                ->label('เลขครุภัณฑ์')
                                 ->unique(column: 'products.product_attr->sku', ignoreRecord: true)
                                 ->maxLength(100)
                                 ->required(),
@@ -190,7 +190,7 @@ class ProductResource extends Resource
                     ->searchable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('product_attr.sku')
-                    ->label('เลขคุรุภัณฑ์')
+                    ->label('เลขครุภัณฑ์')
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
                             ->orderBy('product_attr->sku', $direction);
@@ -267,7 +267,7 @@ class ProductResource extends Resource
                                         ->weight(FontWeight::Bold)
                                         ->limit(30),
                                     Infolists\Components\TextEntry::make('product_attr.sku')
-                                        ->label('เลขคุรุภัณฑ์')
+                                        ->label('เลขครุภัณฑ์')
                                         ->weight(FontWeight::Bold)
                                         ->limit(30),
                                     Infolists\Components\TextEntry::make('description')

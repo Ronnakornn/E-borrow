@@ -11,6 +11,8 @@ use Filament\Resources\Components\Tab;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use pxlrbt\FilamentExcel\Columns\Column;
+use App\Imports\ProductsImport;
+use App\Filament\Imports\ProductImporter;
 
 class ListProducts extends ListRecords
 {
@@ -19,6 +21,9 @@ class ListProducts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\ImportAction::make()
+                ->importer(ProductImporter::class)
+                ->chunkSize(50),
             Actions\CreateAction::make()
                 ->label('เพิ่มอุปกรณ์'),
         ];

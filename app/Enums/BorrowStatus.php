@@ -20,8 +20,8 @@ enum BorrowStatus: string implements HasLabel, HasColor, HasIcon
     {
         return match ($this) {
             self::Pending => 'รอดำเนินการ',
-            self::Confirmed => 'อนุมัติการจอง',
-            self::Canceled => 'ยกเลิกการจอง',
+            self::Confirmed => 'อนุมัติ',
+            self::Canceled => 'ยกเลิก',
             self::Returned => 'คืนอุปกรณ์',
         };
     }

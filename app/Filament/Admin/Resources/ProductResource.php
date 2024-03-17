@@ -24,11 +24,13 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
+    protected static ?string $modelLabel = 'อุปกรณ์';
+
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+
     protected static ?string $navigationLabel = 'อุปกรณ์';
 
     protected static ?string $pluralModelLabel = 'อุปกรณ์';
-
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
 
     public static function form(Form $form): Form
     {
@@ -136,7 +138,7 @@ class ProductResource extends Resource
                             ->id('identifiers')
                             ->schema([
                                 Forms\Components\TextInput::make('product_attr.sku')
-                                    ->label('เลขคุรุภัณฑ์')
+                                    ->label('เลขครุภัณฑ์')
                                     ->unique(column: 'products.product_attr->sku', ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
                                         return $rule->withoutTrashed();
                                     })
@@ -215,7 +217,7 @@ class ProductResource extends Resource
                     ->searchable()
                     ->wrap(),
                 Tables\Columns\TextColumn::make('product_attr.sku')
-                    ->label('เลขคุรุภัณฑ์')
+                    ->label('เลขครุภัณฑ์')
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
                             ->orderBy('product_attr->sku', $direction);
@@ -277,7 +279,7 @@ class ProductResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     ExportBulkAction::make('export')->exports([
                         ExcelExport::make()->withColumns([
-                            Column::make('product_attr.sku')->heading('เลขคุรุภัณฑ์'),
+                            Column::make('product_attr.sku')->heading('เลขครุภัณฑ์'),
                             Column::make('name')->heading('อุปกรณ์'),
                             Column::make('status')->heading('สถานะ'),
                             Column::make('created_at')->heading('สร้างเมื่อ'),
