@@ -248,15 +248,13 @@ class ProductResource extends Resource
                 Infolists\Components\Group::make([
                     Infolists\Components\Section::make('อุปกรณ์')
                     ->schema([
-                        Components\ImageEntry::make('product.product_img')
-                            ->limit(1)
+                        Components\SpatieMediaLibraryImageEntry::make('product->media')
+                            ->collection('products')
                             ->hiddenLabel()
-                            ->defaultImageUrl(static function (Product $record): ?string {
-                                return $record->getFirstMediaUrl('products', 'products');
-                            })
                             ->height('15rem')
                             ->width('15rem')
                             ->square()
+                            ->columnSpanFull()
                             ->extraImgAttributes([
                                 'class' => 'rounded',
                             ]),
