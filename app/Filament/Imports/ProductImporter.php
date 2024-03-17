@@ -24,6 +24,10 @@ class ProductImporter extends Importer
 
     protected function afterSave(): void
     {
+        if(isNull(Arr::get($this->data, 'image'))) {
+            return;
+        }
+
         $this->record->addMedia(Arr::get($this->data, 'image', ''))->preservingOriginal()->storingConversionsOnDisk('media')->toMediaCollection('products', 'media');
     }
 
