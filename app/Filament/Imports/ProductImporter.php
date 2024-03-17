@@ -24,7 +24,7 @@ class ProductImporter extends Importer
 
     protected function afterSave(): void
     {
-        if(isNull(Arr::get($this->data, 'image'))) {
+        if(is_null(Arr::get($this->data, 'image'))) {
             return;
         }
 
