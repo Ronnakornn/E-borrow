@@ -15,6 +15,7 @@ return new class extends Migration
 
         Schema::create('borrows', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->longText('borrow_number')->comment('เลขการยืม');
             $table->longText('note')->nullable();
             $table->date('borrow_date')->comment('วันที่ยืม');
