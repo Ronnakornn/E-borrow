@@ -13,7 +13,7 @@ enum UserPosition: string implements HasLabel
     case Lecturer = 'lecturer';
     case Personnel = 'personnel';
     case Officer = 'officer';
-    case Admin = '';
+    case Admin = 'admin';
 
     public function getLabel(): ?string
     {

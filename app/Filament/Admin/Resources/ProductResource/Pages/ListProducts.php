@@ -21,10 +21,10 @@ class ListProducts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ImportAction::make()
-                ->label('นำเข้าไฟล์')
-                ->importer(ProductImporter::class)
-                ->chunkSize(50),
+            // Actions\ImportAction::make()
+            //     ->label('นำเข้าไฟล์')
+            //     ->importer(ProductImporter::class)
+            //     ->chunkSize(50),
             Actions\CreateAction::make()
                 ->label('เพิ่มอุปกรณ์'),
         ];
@@ -35,21 +35,16 @@ class ListProducts extends ListRecords
         return [
             'ทั้งหมด' => Tab::make('All')
                 ->label('ทั้งหมด'),
-            'พร้อมใช้งาน' => Tab::make()
-                ->modifyQueryUsing(fn ($query) => $query->where('status', 'ready'))
-                ->icon(ProductStatus::Ready->getIcon())
-                ->badge(Product::query()->where('status', 'ready')->count())
-                ->badgeColor(ProductStatus::Ready->getColor()),
-            'ยืม' => Tab::make()
-                ->modifyQueryUsing(fn ($query) => $query->where('status', 'borrow'))
-                ->icon(ProductStatus::Borrow->getIcon())
-                ->badge(Product::query()->where('status', 'borrow')->count())
-                ->badgeColor(ProductStatus::Borrow->getColor()),
-            'ชํารุด' => Tab::make()
-                ->modifyQueryUsing(fn ($query) => $query->where('status', 'bamaged'))
-                ->icon(ProductStatus::Damaged->getIcon())
-                ->badge(Product::query()->where('status', 'bamaged')->count())
-                ->badgeColor(ProductStatus::Damaged->getColor()),
+            'เปิดใช้งาน' => Tab::make()
+                ->modifyQueryUsing(fn ($query) => $query->where('status', 'enabled'))
+                ->icon(ProductStatus::Enabled->getIcon())
+                ->badge(Product::query()->where('status', 'enabled')->count())
+                ->badgeColor(ProductStatus::Enabled->getColor()),
+            'ปิดใช้งาน' => Tab::make()
+                ->modifyQueryUsing(fn ($query) => $query->where('status', 'disabled'))
+                ->icon(ProductStatus::Disabled->getIcon())
+                ->badge(Product::query()->where('status', 'disabled')->count())
+                ->badgeColor(ProductStatus::Disabled->getColor()),
         ];
     }
 }

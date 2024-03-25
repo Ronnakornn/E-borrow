@@ -24,7 +24,7 @@ class Borrow extends Model
         'user_id',
         'borrow_number',
         'description',
-        'name',
+        'phone',
         'borrow_date',
         'borrow_date_return',
         'status',
@@ -41,19 +41,31 @@ class Borrow extends Model
         parent::boot();
 
         static::deleted(function ($model) {
-            $productId = $model->borrowItems->pluck('product_id');
-            Product::whereIn('id', $productId)->update(['status' => 'ready']);
+            $productItemId = $model->borrowItems->pluck('product_item_id')->toArray();
+            ProductItem::whereIn('id', $productItemId)->update(['status_borrow' => 'ready']);
+
+            $productId = $model->borrowItems->pluck('product_id')->toArray();
+            $countQuantity = ProductItem::where('status_quantity', 'enabled')->count();
+            $countBorrow = ProductItem::where('status_quantity', 'enabled')->where('status_borrow', 'ready')->count();
+
+            Product::whereIn('id', $productId)->update(['quantity' => $countQuantity, 'remain' => $countBorrow]);
         });
 
         static::updated(function ($model) {
             $status = $model->status;
-            $productId = $model->borrowItems->pluck('product_id')->toArray();
+            $productItemId = $model->borrowItems->pluck('product_item_id')->toArray();
 
-            if ($status == BorrowStatus::Returned || $status == BorrowStatus::Canceled) {
-                Product::whereIn('id', $productId)->update(['status' => 'ready']);
-            } else if($status == BorrowStatus::Pending || $status == BorrowStatus::Confirmed) {
-                Product::whereIn('id', $productId)->update(['status' => 'borrow']);
+            if ($status == BorrowStatus::Returned || $status === BorrowStatus::Canceled || $status == BorrowStatus::Late) {
+                ProductItem::whereIn('id', $productItemId)->update(['status_borrow' => 'ready']);
+            } else if($status == BorrowStatus::Pending || $status == BorrowStatus::Confirmed ) {
+                ProductItem::whereIn('id', $productItemId)->update(['status_borrow' => 'borrow']);
             }
+
+            $productId = $model->borrowItems->pluck('product_id')->toArray();
+            $countQuantity = ProductItem::where('status_quantity', 'enabled')->count();
+            $countBorrow = ProductItem::where('status_quantity', 'enabled')->where('status_borrow', 'ready')->count();
+
+            Product::whereIn('id', $productId)->update(['quantity' => $countQuantity, 'remain' => $countBorrow]);
         });
 
     }
@@ -76,6 +88,11 @@ class Borrow extends Model
     public function borrowItems()
     {
         return $this->HasMany(BorrowItem::class);
+    }
+
+   public function productItems()
+    {
+        return $this->HasMany(ProductItem::class);
     }
 
     public function products()

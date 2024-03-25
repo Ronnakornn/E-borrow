@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\Json;
+use App\Enums\Branch;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +27,9 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'position',
         'password',
+        'phone',
+        'branch',
+        'user_role',
         'google_id',
     ];
 
@@ -48,6 +52,7 @@ class User extends Authenticatable implements FilamentUser
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'position' => UserPosition::class,
+        'branch' => Branch::class,
     ];
 
         /**

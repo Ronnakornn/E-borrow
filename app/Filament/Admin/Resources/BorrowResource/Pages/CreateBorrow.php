@@ -18,7 +18,7 @@ class CreateBorrow extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $borrow_date_return = Carbon::parse($data['borrow_date']);
-        $borrow_date_return->setTime(17, 0);
+        $borrow_date_return->setTime(16, 0);
 
         $borrowNumber = $this->generateNumber();
         Arr::set($data, 'borrow_number', $borrowNumber);
@@ -49,4 +49,8 @@ class CreateBorrow extends CreateRecord
         return $bookingNumber;
     }
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

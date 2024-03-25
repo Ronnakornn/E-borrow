@@ -2,20 +2,18 @@
 
 namespace App\Filament\Admin\Widgets;
 
-use App\Enums\Branch;
 use App\Models\Borrow;
 use App\Models\User;
-use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
-class BorrowChart extends ChartWidget
+class BorrowCancelChart extends ChartWidget
 {
-    protected static ?string $heading = 'รายการยืม อนุมัติ';
+    protected static ?string $heading = 'รายการยืม ยกเลิก';
 
     protected static ?string $description = 'รายการยืม  / เดือน';
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 4;
 
     protected function getData(): array
     {
@@ -24,7 +22,7 @@ class BorrowChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'รายการยืม(อนุมัติ)',
+                    'label' => 'รายการยืม(ยกเลิก)',
                     'data' => $data['branchPerMonth'],
                 ]
             ],
@@ -34,32 +32,13 @@ class BorrowChart extends ChartWidget
 
     public function getColor(): string
     {
-        return 'success';
+        return 'danger';
     }
 
     protected function getType(): string
     {
         return 'bar';
     }
-
-    // get borrow per month
-    // private function getBorrowPerMonth(){
-    //     $now = Carbon::now();
-
-    //     $months = collect(range(1, 12))->map(function ($month) use ($now) {
-    //         return $now->month($month)->format('M');
-    //     })->toArray();
-
-    //     $borrowsPerMoth = collect(range(1, 12))->map(function ($month) use ($now) {
-    //         $count = Borrow::whereMonth('created_at', $now->month($month))->whereYear('created_at', $now->format('Y'))->count();
-    //         return $count;
-    //     })->toArray();
-
-    //     return [
-    //         'borrowsPerMoth' => $borrowsPerMoth,
-    //         'months' => $months
-    //     ];
-    // }
 
     private function getBorrowPerMonth(){
         $now = Carbon::now();
@@ -68,7 +47,7 @@ class BorrowChart extends ChartWidget
 
         $branchPerMonth = collect($branchEng)->map(function ($branch) use ($now) {
             $managementId =  User::where('branch', $branch)->pluck('id')->toArray();
-            $count = Borrow::where('status', 'confirmed')->whereMonth('created_at', $now->month)->whereYear('created_at', $now->format('Y'))->whereIn('user_id', $managementId)->count();
+            $count = Borrow::where('status', 'canceled')->whereMonth('created_at', $now->month)->whereYear('created_at', $now->format('Y'))->whereIn('user_id', $managementId)->count();
             return $count;
         })->toArray();
 
@@ -79,5 +58,4 @@ class BorrowChart extends ChartWidget
             'branches' => $branches
         ];
     }
-
 }

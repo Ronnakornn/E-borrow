@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Enums\Concerns\Utilities;
+use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
@@ -15,6 +16,7 @@ enum BorrowStatus: string implements HasLabel, HasColor, HasIcon
     case Confirmed = 'confirmed';
     case Canceled = 'canceled';
     case Returned = 'returned';
+    case Late = 'late';
 
     public function getLabel(): ?string
     {
@@ -22,7 +24,8 @@ enum BorrowStatus: string implements HasLabel, HasColor, HasIcon
             self::Pending => 'รอดำเนินการ',
             self::Confirmed => 'อนุมัติ',
             self::Canceled => 'ยกเลิก',
-            self::Returned => 'คืนอุปกรณ์',
+            self::Returned => 'คืนอุปกรณ์แล้ว',
+            self::Late => 'คืนอุปกรณ์ล่าช้า',
         };
     }
 
@@ -33,6 +36,7 @@ enum BorrowStatus: string implements HasLabel, HasColor, HasIcon
             self::Confirmed => 'success',
             self::Canceled => 'danger',
             self::Returned => 'info',
+            self::Late => Color::hex('#EE82EE'),
         };
     }
 
@@ -43,6 +47,7 @@ enum BorrowStatus: string implements HasLabel, HasColor, HasIcon
             self::Confirmed => 'heroicon-o-check',
             self::Canceled => 'heroicon-o-x-mark',
             self::Returned => 'heroicon-o-receipt-refund',
+            self::Late => 'heroicon-o-clock',
         };
     }
 }

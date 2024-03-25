@@ -17,7 +17,7 @@ class Product extends Model implements HasMedia
 {
     use HasFactory, SoftDeletes, InteractsWithMedia;
 
-    protected $with = ['category', 'media'];
+    protected $with = ['category', 'media', 'productItems'];
 
     /**
      * The attributes that are mass assignable.
@@ -30,7 +30,8 @@ class Product extends Model implements HasMedia
         'name',
         'description',
         'product_attr',
-        'amount',
+        'quantity',
+        'remain',
         'warranty',
         'remark',
         'product_img',
@@ -57,6 +58,11 @@ class Product extends Model implements HasMedia
     public function borrowItem()
     {
         return $this->hasMany(BorrowItem::class);
+    }
+
+    public function productItems()
+    {
+        return $this->hasMany(ProductItem::class);
     }
 
     // public function brand()

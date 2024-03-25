@@ -2,6 +2,7 @@
 
 namespace App\Filament\User\Pages;
 
+use App\Enums\Branch;
 use App\Models\User;
 use Exception;
 use Filament\Actions\Action;
@@ -180,17 +181,33 @@ class EditProfile extends Page implements HasForms
                                         ->label('ชื่อ-สกุล')
                                         ->required()
                                         ->maxLength(255),
+                                    Forms\Components\TextInput::make('phone')
+                                        ->label('เบอร์โทรศัพท์')
+                                        ->hint('ไม่ต้องใส่ขีดกลาง (-)')
+                                        ->regex('/^0\d{8,9}$/')
+                                        ->validationAttribute('เบอร์โทรศัพท์')
+                                        ->required(),
                                     Forms\Components\Placeholder::make('email')
                                         ->label('อีเมล')
                                         ->content(fn (): string => $this->data['email'] ?? '-'),
                                     Forms\Components\Select::make('position')
                                         ->label('สถานะผู้ใช้')
+                                        ->lazy()
                                         ->options([
                                             'student' => 'นักศึกษา',
                                             'lecturer' => 'อาจารย์',
                                             'personnel' => 'บุคคลากร',
                                             'officer' => 'เจ้าหน้าที่',
                                         ]),
+                                    Forms\Components\Select::make('branch')
+                                        ->label('สาขา')
+                                        ->required()
+                                        ->options(Branch::class)
+                                        ->hidden(function(Forms\Get $get){
+                                            if($get('position') != 'student'){
+                                                return true;
+                                            }
+                                        }),
                                 ])
                                     ->columnSpan(2),
                             ])

@@ -36,11 +36,16 @@ class ListBorrows extends ListRecords
                 ->icon(BorrowStatus::Confirmed->getIcon())
                 ->badge(Borrow::query()->where('status', 'confirmed')->count())
                 ->badgeColor(BorrowStatus::Confirmed->getColor()),
-            'คืนอุปกรณ์' => Tab::make()
+            'คืนอุปกรณ์แล้ว' => Tab::make()
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'returned')->where('user_id', auth()->user()->id))
                 ->icon(BorrowStatus::Returned->getIcon())
                 ->badge(Borrow::query()->where('status', 'returned')->count())
                 ->badgeColor(BorrowStatus::Returned->getColor()),
+            'คืนอุปกรณ์ล่าช้า' => Tab::make()
+                ->modifyQueryUsing(fn ($query) => $query->whereIn('status', ['confirmed', 'late'])->orWhere('borrow_date', '<', now()))
+                ->icon(BorrowStatus::Late->getIcon())
+                ->badge(Borrow::query()->whereIn('status', ['confirmed', 'late'])->orWhere('borrow_date', '<', now())->count())
+                ->badgeColor(BorrowStatus::Late->getIcon()),
             'ยกเลิกการยืม' => Tab::make()
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'canceled')->where('user_id', auth()->user()->id))
                 ->icon(BorrowStatus::Canceled->getIcon())

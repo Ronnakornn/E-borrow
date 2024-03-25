@@ -34,6 +34,8 @@ class BorrowResource extends Resource
 
     protected static ?string $pluralModelLabel = 'รายการการยืม';
 
+    protected static ?string $modelLabel = 'รายการการยืม';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -67,13 +69,19 @@ class BorrowResource extends Resource
                     ->disabled()
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('phone')
+                    ->label('เบอร์โทรศัพท์')
+                    ->formatStateUsing(fn () => auth()->user()->phone ?? '')
+                    ->tel()
+                    ->required()
+                    ->maxLength(255),
                 Forms\Components\DatePicker::make('borrow_date')
                     ->label('วันที่ยืม')
                     ->seconds(false)
                     ->live(onBlur: true)
                     ->afterStateUpdated(function ($state, Forms\Set $set) {
                         $carbon = Carbon::parse($state);
-                        $carbon->setTime(17, 0);
+                        $carbon->setTime(16, 0);
                         return $set('borrow_date_return', $carbon->toDateTimeString());
                     })
                     ->required(),
@@ -118,7 +126,7 @@ class BorrowResource extends Resource
                                     ->get()
                                     ->pluck('name', 'id');
                             })
-                            ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
+                            // ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
                         // Forms\Components\TextInput::make('amount')
                         //     ->label('จำนวน')
                         //     ->numeric()
@@ -138,6 +146,10 @@ class BorrowResource extends Resource
                 Tables\Columns\TextColumn::make('borrow_number')
                     ->label('รหัสการยืม')
                     ->weight(FontWeight::Bold)
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('เบอร์โทรศัพท์')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('borrow_date')

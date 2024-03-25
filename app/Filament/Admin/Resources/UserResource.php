@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Enums\Branch;
 use App\Enums\UserPosition;
 use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Models\User;
@@ -23,7 +24,9 @@ class UserResource extends Resource
 
     protected static ?string $pluralModelLabel = 'สมาชิก';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-m-user-group';
+
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
@@ -36,6 +39,12 @@ class UserResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->label(('ชื่อ'))
                             ->required(),
+                        Forms\Components\TextInput::make('phone')
+                            ->label('เบอร์โทรศัพท์')
+                            ->hint('ไม่ต้องใส่ขีดกลาง (-)')
+                            ->regex('/^0\d{8,9}$/')
+                            ->validationAttribute('เบอร์โทรศัพท์')
+                            ->required(),
                         Forms\Components\TextInput::make('email')
                             ->label(('อีเมล'))
                             ->regex('/^[\w\.-]+@[\w\.-]+\.\w+$/')
@@ -43,24 +52,39 @@ class UserResource extends Resource
                             ->required(),
                         Forms\Components\Select::make('position')
                             ->label(('สถานะ'))
+                            ->lazy()
                             ->options(UserPosition::class)
                             ->required(),
+                        Forms\Components\Select::make('branch')
+                            ->label('สาขา')
+                            ->required()
+                            ->options(Branch::class)
+                            ->hidden(function(Forms\Get $get){
+                                if($get('position') != 'student'){
+                                    return true;
+                                }
+                            }),
                         Forms\Components\TextInput::make('password')
-                            ->label('รหัส')
-                            ->required(fn (string $context): bool => $context === 'create')
-                            ->autocomplete(false)
-                            ->dehydrateStateUsing(fn ($state) => Hash::make($state)),
-                        // TextInput::make('user_info.phone')
-                        //     ->label(__('admin/menu.customer.field.phone'))
-                        //     ->hint('ไม่ต้องใส่ขีดกลาง (-)')
-                        //     ->regex('/^0\d{8,9}$/')
-                        //     ->validationAttribute('เบอร์โทรศัพท์')
-                        //     ->required(),
-                        // Textarea::make('user_info.address')
-                        //     ->label(__('admin/menu.customer.field.address'))
-                        //     ->required()
-                        //     ->columnSpan('full')
-                        //     ->rows(2),
+                            ->label('รหัสผ่าน')
+                            ->helperText('รหัสผ่าน ต้องมีความยาวมากกว่า 8 และไม่เกิน 30 ตัวอักษร')
+                            ->password()
+                            ->revealable()
+                            ->minLength(8)
+                            ->maxLength(30)
+                            ->afterStateHydrated(function (Forms\Components\TextInput $component, $state) {
+                                $component->state('');
+                            })
+                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (string $context): bool => $context === 'create'),
+                        Forms\Components\Select::make('user_role')
+                            ->label('ตําแหน่งการใช้งานระบบ')
+                            ->required()
+                            ->options([
+                                'admin' => 'ผู้ดูแลระบบ',
+                                'customer' => 'ผู้ใช้งาน',
+                            ])
+                            ->default('customer'),
                     ])->columns(2)
                 ])->columnSpan(['lg' => fn (?User $record) => $record === null ? 3 : 2]),
                 Forms\Components\Group::make()
@@ -93,12 +117,27 @@ class UserResource extends Resource
                     ->label(('ชื่อ'))
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('เบอร์โทรศัพท์')
+                    ->placeholder('-')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->label(('อีเมล'))
                     ->sortable()
                     ->searchable(),
+                Tables\Columns\TextColumn::make('branch')
+                    ->label('สาขา')
+                    ->placeholder('-')
+                    ->sortable()
+                    ->badge()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('position')
                     ->label('สถานะ')
+                    ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('user_role')
+                    ->label('ตําแหน่งการใช้งานระบบ')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')

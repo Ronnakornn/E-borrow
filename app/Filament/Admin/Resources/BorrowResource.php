@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\BorrowResource\Pages;
 use App\Filament\Admin\Resources\BorrowResource\RelationManagers;
 use App\Models\Borrow;
 use App\Models\Product;
+use App\Models\ProductItem;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -30,7 +31,11 @@ class BorrowResource extends Resource
 
     protected static ?string $navigationLabel = 'รายการการยืม';
 
-    protected static ?string $pluralModelLabel = 'รายการการยืม';
+    protected static ?string $navigationGroup = 'รายการการยืม';
+
+    protected static ?string $modelLabel = 'รายการการยืม';
+
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {
@@ -73,13 +78,19 @@ class BorrowResource extends Resource
                     ->native(false)
                     ->optionsLimit(20)
                     ->required(),
+                Forms\Components\TextInput::make('phone')
+                    ->label('เบอร์โทรศัพท์')
+                    ->tel()
+                    ->regex('/^0\d{8,9}$/')
+                    ->validationAttribute('เบอร์โทรศัพท์')
+                    ->required(),
                 Forms\Components\DatePicker::make('borrow_date')
                     ->label('วันที่ยืม')
                     ->seconds(false)
                     ->live(onBlur: true)
                     ->afterStateUpdated(function ($state, Forms\Set $set) {
                         $carbon = Carbon::parse($state);
-                        $carbon->setTime(17, 0);
+                        $carbon->setTime(16, 0);
                         return $set('borrow_date_return', $carbon->toDateTimeString());
                     })
                     ->required(),
@@ -101,9 +112,10 @@ class BorrowResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('product_id')
                             ->label('อุปกรณ์')
+                            ->lazy()
                             ->relationship('product', 'name')
                             ->options(function () {
-                                return Product::where('status', 'ready')
+                                return Product::where('status', 'enabled')
                                     ->limit(20)
                                     ->get()
                                     ->pluck('name', 'id');
@@ -112,23 +124,25 @@ class BorrowResource extends Resource
                             ->searchable()
                             ->required()
                             ->getSearchResultsUsing(function (string $search) {
-                                return Product::where('product_attr->sku', 'like', "%{$search}%")
+                                return Product::where('name', 'like', "%{$search}%")
                                     ->orWhere('name', 'like', "%{$search}%")
-                                    ->where('status', 'ready')
+                                    ->where('status', 'enabled')
                                     ->limit(50)
                                     ->get()
                                     ->pluck('name', 'id');
-                            })
-                            ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
-                        // Forms\Components\TextInput::make('amount')
-                        //     ->label('จำนวน')
-                        //     ->numeric()
-                        //     ->step(1)
-                        //     ->minValue(1)
-                        //     ->default(1)
-                        //     ->required(),
-                    ])
-                    ->disabled( fn ($context) => $context === 'edit' )
+                            }),
+                        Forms\Components\Select::make('product_item_id')
+                            ->label('เลขครุภัณฑ์')
+                            ->lazy()
+                            ->relationship(
+                                'productItem',
+                                'sku',
+                                modifyQueryUsing: fn (Builder $query, Forms\Get $get, $record) => $query->where('product_id', $get('product_id'))->where('status_quantity', 'enabled')->Where('status_borrow', 'ready')->orWhere('id', $record?->product_item_id)
+                            )
+                            ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                            ->required(),
+                    ])->columns(2)
+                    // ->disabled( fn ($context) => $context === 'edit' )
             ])->columns(['lg' => 'full']),
             Forms\Components\Section::make('สถานะการยืม')
                 ->schema([
@@ -156,16 +170,19 @@ class BorrowResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
-                // Tables\Columns\TextColumn::make('borrow_number')
-                //     ->label('ผddd')
-                //     ->formatStateUsing(fn ($record) => dd($record))
-                //     ->weight(FontWeight::Bold)
-                //     ->searchable()
-                //     ->sortable(),
+                Tables\Columns\TextColumn::make('user.branch')
+                    ->label('สาขา')
+                    ->searchable()
+                    ->badge()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('เบอร์โทรศัพท์')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('borrow_date')
                     ->label('วันที่ยืม')
                     ->searchable()
-                    ->dateTime('d/m/Y H:i')
+                    ->dateTime('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('borrow_date_return')
                     ->label('กำหนดคืน')
@@ -180,6 +197,7 @@ class BorrowResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('วันที่ทำรายการ')
                     ->searchable()
+                    ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
             ->filters([
@@ -225,9 +243,18 @@ class BorrowResource extends Resource
                         ExcelExport::make()->withColumns([
                             Column::make('borrow_number')->heading('รหัสการยืม'),
                             Column::make('user.name')->heading('ผู้ยืม'),
+                            Column::make('user.branch')->heading('สาขา'),
+                            Column::make('phone')->heading('เบอร์โทรศัพท์'),
                             Column::make('product')->heading('อุปกรณ์')
                                 ->getStateUsing(function ($record) {
                                     $productName = $record->borrowItems->pluck('product.name')->toArray();
+                                    $productName = implode(', ', array_values($productName));
+
+                                    return $productName;
+                                }),
+                            Column::make('borrowItems.productItem')->heading('ครุภัณฑ์')
+                                ->getStateUsing(function ($record) {
+                                    $productName = $record->borrowItems->pluck('productItem.sku')->toArray();
                                     $productName = implode(', ', array_values($productName));
 
                                     return $productName;

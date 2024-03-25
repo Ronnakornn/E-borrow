@@ -17,7 +17,7 @@ class CreateBorrow extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $borrow_date_return = Carbon::parse($data['borrow_date']);
-        $borrow_date_return->setTime(17, 0);
+        $borrow_date_return->setTime(16, 0);
         $borrowNumber = $this->generateNumber();
 
         // $productAmount = $data['borrowItems']->pluck('product_id', 'amount');

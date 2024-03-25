@@ -32,6 +32,10 @@ class ProductResource extends Resource
 
     protected static ?string $pluralModelLabel = 'อุปกรณ์';
 
+    protected static ?string $navigationGroup = 'อุปกรณ์';
+
+    protected static ?int $navigationSort = 2;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -46,7 +50,7 @@ class ProductResource extends Resource
                                     ->relationship(
                                         name: 'category',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: fn (Builder $query) => $query->enabled(),
+                                        modifyQueryUsing: fn (Builder $query) => $query->where('status', 'enabled'),
                                     )
                                     ->preload()
                                     ->searchable()
@@ -68,16 +72,6 @@ class ProductResource extends Resource
                                     ->nullable()
                                     ->autosize()
                                     ->columnSpanFull(),
-                                // Forms\Components\TextInput::make('product_attr.color')
-                                //     ->label('สี'),
-                                // Forms\Components\TextInput::make('product_attr.weight')
-                                //     ->label('น้ำหนัก'),
-                                // Forms\Components\TextInput::make('product_attr.dimension')
-                                //     ->label('ขนาด'),
-                                // Forms\Components\TextInput::make('warranty')
-                                //     ->label('การรับประกัน')
-                                //     ->maxLength(100)
-                                //     ->columnSpanFull(),
                             ])
                             ->columns(3)
                             ->columnSpan(['lg' => 1]),
@@ -110,8 +104,8 @@ class ProductResource extends Resource
                                 Forms\Components\Placeholder::make('status_description')
                                     ->hiddenLabel()
                                     ->live()
-                                    ->default(true)
-                                    ->content(fn (Get $get): string => $get('status') === 'enabled' ? 'พร้อมให้บริการตลอดเวลา' : 'ไม่พร้อมให้บริการตลอดเวลา'),
+                                    ->default('enable')
+                                    ->content(fn (Get $get): string => $get('status') === 'enable' ? 'พร้อมให้บริการตลอดเวลา' : 'ไม่พร้อมให้บริการตลอดเวลา'),
                             ])
                             ->columns(2),
                         Forms\Components\Section::make('ราคา')
@@ -134,31 +128,6 @@ class ProductResource extends Resource
                                     ->step(0.01)
                                     ->required(),
                             ])->columns(6),
-                        Forms\Components\Section::make('ตัวบ่งชี้อุปกรณ์')
-                            ->id('identifiers')
-                            ->schema([
-                                Forms\Components\TextInput::make('product_attr.sku')
-                                    ->label('เลขครุภัณฑ์')
-                                    ->unique(column: 'products.product_attr->sku', ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
-                                        return $rule->withoutTrashed();
-                                    })
-                                    ->maxLength(100)
-                                    ->required(),
-                            ]),
-                        // Forms\Components\Section::make('อุปกรณ์คงคลัง')
-                        //     ->id('inventory')
-                        //     ->schema([
-                        //         Forms\Components\TextInput::make('amount')
-                        //             ->label('จำนวนอุปกรณ์')
-                        //             ->numeric()
-                        //             ->minValue(0)
-                        //             ->required(),
-                        //         // Forms\Components\Select::make('type')
-                        //         //     ->label('ประเภทอุปกรณ์')
-                        //         //     ->required()
-                        //         //     ->options(ProductType::class),
-                        //     ])
-                        //     ->columns(2),
                         Forms\Components\Section::make('หมายเหตุ')
                             ->id('remarks')
                             ->schema([
@@ -216,14 +185,6 @@ class ProductResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->wrap(),
-                Tables\Columns\TextColumn::make('product_attr.sku')
-                    ->label('เลขครุภัณฑ์')
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        return $query
-                            ->orderBy('product_attr->sku', $direction);
-                    })
-                    ->searchable('product_attr->sku')
-                    ->alignment(Alignment::Center),
                 Tables\Columns\TextColumn::make('product_attr.price')
                     ->label('ราคา')
                     ->money('THB')
@@ -233,16 +194,12 @@ class ProductResource extends Resource
                     })
                     ->searchable('product_attr->price')
                     ->alignment(Alignment::End),
-                // Tables\Columns\TextColumn::make('amount')
-                //     ->label('จํานวน')
-                //     ->sortable()
-                //     ->searchable()
-                //     ->alignment(Alignment::Center),
-                // Tables\Columns\TextColumn::make('type')
-                //     ->label('ประเภท')
-                //     ->badge()
-                //     ->sortable()
-                //     ->searchable()->alignment(Alignment::Center),
+                Tables\Columns\TextColumn::make('remain')
+                    ->label('จำนวนคงเหลือ')
+                    ->formatStateUsing(fn ($record): ?string => $record?->remain . '/' . $record?->quantity)
+                    ->alignment(Alignment::Center)
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('สถานะ')
                     ->sortable()
@@ -256,20 +213,6 @@ class ProductResource extends Resource
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
-                // Tables\Filters\Filter::make('published_at')
-                //     ->form([
-                //         Forms\Components\Select::make('status')
-                //             ->label('สถานะ')
-                //             ->options(ProductType::class)
-                //             ->native(false)
-                //     ])
-                //     ->query(function (Builder $query, array $data): Builder {
-                //         return $query
-                //             ->when(
-                //                 $data['status'],
-                //                 fn (Builder $query, $status): Builder => $query->where('status', $status),
-                //             );
-                //     })
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -277,10 +220,13 @@ class ProductResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    ExportBulkAction::make('export')->exports([
+                    ExportBulkAction::make('export')
+                    ->exports([
                         ExcelExport::make()->withColumns([
-                            Column::make('product_attr.sku')->heading('เลขครุภัณฑ์'),
                             Column::make('name')->heading('อุปกรณ์'),
+                            Column::make('product_attr.price')->heading('ราคา'),
+                            Column::make('remain')->heading('จำนวนคงเหลือ'),
+                            Column::make('quantity')->heading('จำนวนทั้งหมด'),
                             Column::make('status')->heading('สถานะ'),
                             Column::make('created_at')->heading('สร้างเมื่อ'),
                         ])

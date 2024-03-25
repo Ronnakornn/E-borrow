@@ -18,9 +18,8 @@ class EditBorrow extends EditRecord
         ];
     }
 
-    // protected function mutateFormDataBeforeSave(array $data): array
-    // {
-    //     dd($data);
-    // }
-
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

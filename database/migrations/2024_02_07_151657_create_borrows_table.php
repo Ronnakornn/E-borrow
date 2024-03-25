@@ -17,10 +17,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->longText('borrow_number')->comment('เลขการยืม');
+            $table->string('phone')->nullable();
             $table->longText('note')->nullable();
             $table->date('borrow_date')->comment('วันที่ยืม');
             $table->dateTime('borrow_date_return')->comment('วันที่คืน');
-            $table->enum('status', ['pending', 'confirmed', 'canceled', 'returned'])->default('pending')->comment('สถานะการยืม');
+            $table->enum('status', ['pending', 'confirmed', 'canceled', 'returned', 'late'])->default('pending')->comment('สถานะการยืม');
 
             $table->timestamps();
         });

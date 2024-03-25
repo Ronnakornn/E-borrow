@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->longText('description')->nullable();
             $table->string('category_img', 100)->nullable();
-            $table->enum('status', ['enable', 'disable']);
+            $table->enum('status', ['enabled', 'disabled']);
             $table->softDeletes();
             $table->timestamps();
         });
