@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('position')->nullable();
             $table->string('branch')->nullable();
             $table->string('password');
-            $table->enum('user_role', ['superAdmin', 'admin', 'company', 'customer'])->default('customer');
+            $table->enum('user_role', ['superAdmin', 'admin', 'company', 'customer'])->default('admin');
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->json('user_info')->nullable();
             $table->string('user_img', 100)->nullable();
