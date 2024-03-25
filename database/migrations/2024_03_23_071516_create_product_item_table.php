@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->string('sku')->unique();
-            $table->enum('status_quantity', ['enabled','disabled','bamaged'])->default('enable');
+            $table->enum('status_quantity', ['enabled','disabled','bamaged'])->default('enabled');
             $table->enum('status_borrow', ['ready','borrow'])->default('ready');
             $table->longText('remark')->nullable();
             $table->timestamps();
