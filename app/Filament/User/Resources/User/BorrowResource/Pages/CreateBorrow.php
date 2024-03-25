@@ -20,38 +20,12 @@ class CreateBorrow extends CreateRecord
         $borrow_date_return->setTime(16, 0);
         $borrowNumber = $this->generateNumber();
 
-        // $productAmount = $data['borrowItems']->pluck('product_id', 'amount');
-
-        // foreach ($productAmount as $key => $value) {
-        //     $product = Product::where('id', $key)->decrement('amount', $value);
-        // }
-
         Arr::set($data, 'borrow_number', $borrowNumber);
         Arr::set($data, 'borrow_date_return', $borrow_date_return->toDateTimeString());
         Arr::set($data, 'user_id', auth()->user()->id);
 
         return $data;
     }
-
-    // protected function beforeCreate()
-    // {
-    //     return false;
-    // }
-
-    // protected function afterCreate(): void
-    // {
-    //     $bookingNumber = $this->getRecord();
-
-    //     $bookingNumber->borrowItems->map(function (string $value) {
-    //         $item = json_decode($value);
-    //         $product = Product::where('id', '=',  $item->product_id)->first();
-    //         $stock = $product->amount-$item->amount;
-    //         if($stock >= 0){
-    //             $product->amount = $stock;
-    //             $product->save();
-    //         }
-    //     });
-    // }
 
     protected function generateNumber(){
         $currentDate = Carbon::now()->format('ymd');
@@ -73,6 +47,11 @@ class CreateBorrow extends CreateRecord
         $bookingNumber = "BR-{$currentDate}-{$paddedSerial}";
 
         return $bookingNumber;
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
     }
 
 }

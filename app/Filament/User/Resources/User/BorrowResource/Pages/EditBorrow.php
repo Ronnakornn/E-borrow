@@ -17,4 +17,9 @@ class EditBorrow extends EditRecord
                 ->hidden(fn ($record) => $record->status->value != 'pending'),
         ];
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
