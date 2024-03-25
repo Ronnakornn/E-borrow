@@ -8,6 +8,7 @@ use App\Filament\Admin\Resources\BorrowResource\RelationManagers;
 use App\Models\Borrow;
 use App\Models\Product;
 use App\Models\ProductItem;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -72,14 +73,20 @@ class BorrowResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Select::make('user_id')
                     ->label('สมาชิก')
+                    ->live(onBlur: true)
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload()
                     ->native(false)
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        $user = User::find($state);
+                        $set('phone', $user->phone);
+                    })
                     ->optionsLimit(20)
                     ->required(),
                 Forms\Components\TextInput::make('phone')
                     ->label('เบอร์โทรศัพท์')
+                    ->live(onBlur: true)
                     ->tel()
                     ->regex('/^0\d{8,9}$/')
                     ->validationAttribute('เบอร์โทรศัพท์')
@@ -139,6 +146,8 @@ class BorrowResource extends Resource
                                 'sku',
                                 modifyQueryUsing: fn (Builder $query, Forms\Get $get, $record) => $query->where('product_id', $get('product_id'))->where('status_quantity', 'enabled')->Where('status_borrow', 'ready')->orWhere('id', $record?->product_item_id)
                             )
+                            ->preload()
+                            ->searchable()
                             ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                             ->required(),
                     ])->columns(2)

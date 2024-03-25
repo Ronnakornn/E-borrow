@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('borrow_id')->constrained( table: 'borrows')->cascadeOnDelete()->comment('ไอดีการยืม');
             $table->foreignId('product_id')->constrained()->nullable()->comment('ไอดีผู้ใช้');
-            $table->foreignId('product_item_id')->constrained( table: 'product_items' )->nullable()->comment('ไอดีสินค้า');
+            $table->foreignId('product_item_id')->nullable()->constrained( table: 'product_items' )->comment('ไอดีสินค้า');
             $table->string('product_name', 100)->nullable();
             $table->integer('amount')->nullable()->unsigned()->comment('จำนวน');
             $table->timestamps();

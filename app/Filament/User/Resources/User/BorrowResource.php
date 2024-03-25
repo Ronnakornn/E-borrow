@@ -73,8 +73,9 @@ class BorrowResource extends Resource
                     ->label('เบอร์โทรศัพท์')
                     ->formatStateUsing(fn () => auth()->user()->phone ?? '')
                     ->tel()
-                    ->required()
-                    ->maxLength(255),
+                    ->regex('/^0\d{8,9}$/')
+                    ->validationAttribute('เบอร์โทรศัพท์')
+                    ->required(),
                 Forms\Components\DatePicker::make('borrow_date')
                     ->label('วันที่ยืม')
                     ->seconds(false)

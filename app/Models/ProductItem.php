@@ -11,8 +11,6 @@ class ProductItem extends Model
 {
     use HasFactory;
 
-    protected $table = 'product_item';
-
     protected $fillable = [
         'product_id',
         'sku',
