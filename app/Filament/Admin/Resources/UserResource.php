@@ -142,7 +142,7 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->alignment(Alignment::Center)
-                        ->label('สร้างเมื่อ')
+                        ->label('เป็นสมาชิกเมื่อ')
                         ->dateTime('d/m/Y H:i:s')
                         ->sortable()
             ])

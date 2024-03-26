@@ -266,6 +266,5 @@ class EditProfile extends Page implements HasForms
             ->url(filament()->getUrl())
             ->color('gray');
     }
-
 }
 

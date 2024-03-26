@@ -215,7 +215,7 @@ class BorrowResource extends Resource
                                             'class' => 'rounded',
                                         ]),
                                     Infolists\Components\TextEntry::make('product.name')
-                                        ->label('ชื่อสินค้า')
+                                        ->label('ชื่ออุปกรณ์')
                                         ->hiddenLabel()
                                         ->weight(FontWeight::Bold)
                                         ->helperText(function (BorrowItem $record) {

@@ -105,7 +105,7 @@ class ProductResource extends Resource
                             Infolists\Components\Section::make('รายละเอียดอุปกรณ์')
                                 ->schema([
                                     Infolists\Components\TextEntry::make('name')
-                                        ->label('ชื่อสินค้า')
+                                        ->label('ชื่ออุปกรณ์')
                                         ->weight(FontWeight::Bold)
                                         ->copyable()
                                         ->copyMessage('Copied!')
