@@ -127,14 +127,6 @@ class BorrowResource extends Resource
                                     ->get()
                                     ->pluck('name', 'id');
                             })
-                            // ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
-                        // Forms\Components\TextInput::make('amount')
-                        //     ->label('จำนวน')
-                        //     ->numeric()
-                        //     ->step(1)
-                        //     ->minValue(1)
-                        //     ->default(1)
-                        //     ->required(),
                     ])
             ])->columns(['lg' => 'full']),
         ]);
@@ -149,6 +141,19 @@ class BorrowResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('borrowItems')
+                    ->label('อุปกรณ์')
+                    ->searchable()
+                    ->formatStateUsing(function ($record) {
+                        return $record->borrowItems->pluck('productItem.product.name')->join(', ');
+                    })
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('user')
+                    ->label('รหัสอุปกรณ์')
+                    ->searchable()
+                    ->formatStateUsing(function ($record) {
+                        return $record->borrowItems->pluck('productItem.sku')->join(', ');
+                    }),
                 Tables\Columns\TextColumn::make('phone')
                     ->label('เบอร์โทรศัพท์')
                     ->searchable()
@@ -199,10 +204,6 @@ class BorrowResource extends Resource
                                     Infolists\Components\ImageEntry::make('image')
                                         ->limit(1)
                                         ->hiddenLabel()
-                                        // ->getStateUsing(static function (BorrowItem $record): ?string {
-                                        //     dd($record->product->getFirstMediaUrl('products', 'mobile'));
-                                        //     return $record->product->getFirstMediaUrl('products', 'mobile');
-                                        // })
                                         ->defaultImageUrl(
                                             static function (BorrowItem $record): ?string {
                                                 return $record->product->getFirstMediaUrl('products', 'mobile');
