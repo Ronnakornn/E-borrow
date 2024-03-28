@@ -58,9 +58,11 @@ class UserResource extends Resource
                             ->required()
                             ->options(Branch::class)
                             ->hidden(function(Forms\Get $get){
-                                if ($get('position') != 'student' || $get('position') != 'teacher') {
-                                    return true;
+                                if ($get('position') === 'student' || $get('position') === 'lecturer') {
+                                    return false;
                                 }
+
+                                return true;
                             }),
                         Forms\Components\TextInput::make('password')
                             ->label('รหัสผ่าน')

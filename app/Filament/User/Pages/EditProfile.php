@@ -204,9 +204,11 @@ class EditProfile extends Page implements HasForms
                                         ->required()
                                         ->options(Branch::class)
                                         ->hidden(function(Forms\Get $get){
-                                            if ($get('position') != 'student' || $get('position') != 'teacher') {
-                                                return true;
+                                            if ($get('position') === 'student' || $get('position') === 'lecturer') {
+                                                return false;
                                             }
+
+                                            return true;
                                         }),
                                 ])
                                     ->columnSpan(2),
