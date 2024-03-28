@@ -110,11 +110,9 @@ class ProductResource extends Resource
                                         ->copyable()
                                         ->copyMessage('Copied!')
                                         ->limit(30),
-                                    Infolists\Components\TextEntry::make('name')
+                                    Infolists\Components\TextEntry::make('productItems.sku')
                                         ->label('เลขครุภัณฑ์')
-                                        ->formatStateUsing(function ($record) {
-                                            return implode(", ", $record->productItems->pluck('sku')->toArray());
-                                        })
+                                        ->separator(',')
                                         ->badge()
                                         ->weight(FontWeight::Bold),
                                     Infolists\Components\TextEntry::make('description')

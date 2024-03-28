@@ -141,19 +141,15 @@ class BorrowResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('borrowItems')
+                Tables\Columns\TextColumn::make('borrowItems.productItem.product.name')
                     ->label('อุปกรณ์')
+                    ->wrap()
                     ->searchable()
-                    ->formatStateUsing(function ($record) {
-                        return $record->borrowItems->pluck('productItem.product.name')->join(', ');
-                    })
                     ->sortable(),
-                Tables\Columns\TextColumn::make('user')
+                Tables\Columns\TextColumn::make('borrowItems.productItem.sku')
                     ->label('รหัสอุปกรณ์')
-                    ->searchable()
-                    ->formatStateUsing(function ($record) {
-                        return $record->borrowItems->pluck('productItem.sku')->join(', ');
-                    }),
+                    ->wrap()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->label('เบอร์โทรศัพท์')
                     ->searchable()
