@@ -14,11 +14,15 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\Alignment;
-use Illuminate\Validation\Rules\Unique;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use pxlrbt\FilamentExcel\Columns\Column;
+use Filament\Infolists\Infolist;
+use Filament\Infolists;
+use Filament\Support\Enums\FontWeight;
+use Illuminate\Support\Arr;
+use Illuminate\Support\HtmlString;
+
 
 class ProductResource extends Resource
 {

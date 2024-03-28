@@ -4,10 +4,9 @@ namespace App\Filament\Admin\Resources;
 
 use App\Enums\BorrowStatus;
 use App\Filament\Admin\Resources\BorrowResource\Pages;
-use App\Filament\Admin\Resources\BorrowResource\RelationManagers;
 use App\Models\Borrow;
+use App\Models\BorrowItem;
 use App\Models\Product;
-use App\Models\ProductItem;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,14 +14,14 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\FontWeight;
 use Carbon\Carbon;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use pxlrbt\FilamentExcel\Columns\Column;
-use Filament\Support\Enums\Alignment;
+use Filament\Infolists\Infolist;
+use Filament\Infolists;
+use Illuminate\Support\HtmlString;
 
 class BorrowResource extends Resource
 {
@@ -30,11 +29,11 @@ class BorrowResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-newspaper';
 
-    protected static ?string $navigationLabel = 'รายการการยืม';
+    protected static ?string $navigationLabel = 'รายการการยืม-คืน';
 
-    protected static ?string $navigationGroup = 'รายการการยืม';
+    protected static ?string $navigationGroup = 'รายการการยืม-คืน';
 
-    protected static ?string $modelLabel = 'รายการการยืม';
+    protected static ?string $modelLabel = 'รายการการยืม-คืน';
 
     protected static ?int $navigationSort = 5;
 
@@ -241,6 +240,7 @@ class BorrowResource extends Resource
                 }),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
                     ->label('ลบ')
@@ -273,12 +273,81 @@ class BorrowResource extends Resource
                             Column::make('borrow_date_return')->heading('กำหนดคืน'),
                             Column::make('status')->heading('สถานะ'),
                             Column::make('created_at')->heading('วันที่ทำรายการ'),
-                        ])
-                    ]),
+                        ]),
+                    ])->label('รายงานการยืม'),
                     Tables\Actions\DeleteBulkAction::make(),
                 ])
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Group::make([
+                    Infolists\Components\Section::make('รายการอุปกรณ์')
+                        ->schema([
+                            Infolists\Components\RepeatableEntry::make('borrowItems')
+                                ->label('รายการอุปกรณ์')
+                                ->hiddenLabel()
+                                ->contained(false)
+                                ->schema([
+                                    Infolists\Components\ImageEntry::make('image')
+                                        ->limit(1)
+                                        ->hiddenLabel()
+                                        ->defaultImageUrl(
+                                            static function (BorrowItem $record): ?string {
+                                                return $record->product->getFirstMediaUrl('products', 'mobile');
+                                            }
+                                        )
+                                        ->height('8rem')
+                                        ->width('8rem')
+                                        ->square()
+                                        ->extraImgAttributes([
+                                            'class' => 'rounded',
+                                        ]),
+                                    Infolists\Components\TextEntry::make('product.name')
+                                        ->label('ชื่ออุปกรณ์')
+                                        ->hiddenLabel()
+                                        ->weight(FontWeight::Bold)
+                                        ->helperText(function (BorrowItem $record) {
+                                            return new HtmlString(data_get($record->productItem, 'sku'));
+                                        })
+                                ])
+                            ])
+                        ]),
+                Infolists\Components\Group::make([
+                    Infolists\Components\Section::make('ข้อมูลการยืม')
+                        ->schema([
+                            Infolists\Components\TextEntry::make('status')
+                                ->label('สถานะ')
+                                ->badge(),
+                            Infolists\Components\TextEntry::make('borrow_number')
+                                ->label('รหัสการยืม')
+                                ->copyable(),
+                            Infolists\Components\TextEntry::make('user.name')
+                                ->label('ผู้ยืม'),
+                            Infolists\Components\TextEntry::make('user.branch')
+                                ->label('สาขา'),
+                            Infolists\Components\TextEntry::make('phone')
+                                ->label('เบอร์โทรศัพท์'),
+                            Infolists\Components\TextEntry::make('note')
+                                ->label('หมายเหตุ')
+                                ->default('ไม่มี'),
+                            Infolists\Components\TextEntry::make('borrow_date')
+                                ->label('วันที่ยืม'),
+                            Infolists\Components\TextEntry::make('borrow_date_return')
+                                ->label('กำหนดคืน'),
+                    ])->columns(2),
+                    Infolists\Components\Section::make([
+                        Infolists\Components\TextEntry::make('created_at')
+                            ->label('สร้างเมื่อ'),
+                        Infolists\Components\TextEntry::make('updated_at')
+                            ->label('แก้ไขเมื่อ'),
+                    ])
+                ])
+            ]);
     }
 
     public static function getRelations(): array
@@ -294,6 +363,7 @@ class BorrowResource extends Resource
             'index' => Pages\ListBorrows::route('/'),
             'create' => Pages\CreateBorrow::route('/create'),
             'edit' => Pages\EditBorrow::route('/{record}/edit'),
+            // 'view' => Pages\ViewBorrow::route('/{record}'),
         ];
     }
 }

@@ -11,8 +11,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Support\Facades\Hash;
 
@@ -60,7 +58,7 @@ class UserResource extends Resource
                             ->required()
                             ->options(Branch::class)
                             ->hidden(function(Forms\Get $get){
-                                if($get('position') != 'student'){
+                                if ($get('position') != 'student' || $get('position') != 'teacher') {
                                     return true;
                                 }
                             }),

@@ -48,7 +48,7 @@ enum ProductStatus: string implements HasLabel, HasColor, HasIcon
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::Enabled => 'เปิดใช้งาน',
+            self::Enabled => 'พร้อมใช้งาน',
             self::Disabled => 'ปิดใช้งาน',
         };
     }

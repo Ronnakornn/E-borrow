@@ -25,7 +25,8 @@ class ListBorrows extends ListRecords
     {
         return [
             'ทั้งหมด' => Tab::make('All')
-                ->label('ทั้งหมด'),
+                ->label('ทั้งหมด')
+                ->modifyQueryUsing(fn ($query) => $query->where('user_id', auth()->user()->id)),
             'รอดำเนินการ' => Tab::make()
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'pending')->where('user_id', auth()->user()->id))
                 ->icon(BorrowStatus::Pending->getIcon())
@@ -41,11 +42,6 @@ class ListBorrows extends ListRecords
                 ->icon(BorrowStatus::Returned->getIcon())
                 ->badge(Borrow::query()->where('status', 'returned')->count())
                 ->badgeColor(BorrowStatus::Returned->getColor()),
-            'คืนอุปกรณ์ล่าช้า' => Tab::make()
-                ->modifyQueryUsing(fn ($query) => $query->whereIn('status', ['confirmed', 'late'])->orWhere('borrow_date', '<', now()))
-                ->icon(BorrowStatus::Late->getIcon())
-                ->badge(Borrow::query()->whereIn('status', ['confirmed', 'late'])->orWhere('borrow_date', '<', now())->count())
-                ->badgeColor(BorrowStatus::Late->getIcon()),
             'ยกเลิกการยืม' => Tab::make()
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'canceled')->where('user_id', auth()->user()->id))
                 ->icon(BorrowStatus::Canceled->getIcon())

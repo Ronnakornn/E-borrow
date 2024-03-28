@@ -4,8 +4,6 @@ namespace App\Filament\User\Resources\User;
 
 use App\Filament\User\Resources\User\ProductResource\Pages;
 use App\Models\Product;
-use COM;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -15,7 +13,6 @@ use Filament\Infolists\Infolist;
 use Filament\Infolists\Components;
 use Filament\Support\Enums\FontWeight;
 use Filament\Infolists;
-use Filament\Support\Colors\Color;
 
 class ProductResource extends Resource
 {
@@ -51,7 +48,7 @@ class ProductResource extends Resource
                         'class' => 'rounded',
                     ]),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('ชื่อ')
+                    ->label('ชื่ออุปกรณ์')
                     ->sortable()
                     ->searchable()
                     ->wrap(),

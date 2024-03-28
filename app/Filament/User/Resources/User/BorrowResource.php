@@ -3,26 +3,20 @@
 namespace App\Filament\User\Resources\User;
 
 use App\Filament\User\Resources\User\BorrowResource\Pages;
-use App\Filament\User\Resources\User\BorrowResource\RelationManagers;
 use App\Models\Borrow;
 use App\Models\BorrowItem;
 use App\Models\Product;
-use App\Enums\BorrowStatus;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Carbon\Carbon;
 use Filament\Support\Enums\FontWeight;
 use Filament\Infolists\Infolist;
 use Filament\Infolists;
 use Illuminate\Support\Arr;
 use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
-
 
 class BorrowResource extends Resource
 {
@@ -216,7 +210,7 @@ class BorrowResource extends Resource
                                         ->hiddenLabel()
                                         ->weight(FontWeight::Bold)
                                         ->helperText(function (BorrowItem $record) {
-                                            return new HtmlString(Arr::get($record->product->product_attr, 'sku'));
+                                            return new HtmlString(Arr::get($record->productItem, 'sku'));
                                         })
                                         ->limit(30)
                                         ->columnSpan(['default' => 2, 'sm' => 4]),
