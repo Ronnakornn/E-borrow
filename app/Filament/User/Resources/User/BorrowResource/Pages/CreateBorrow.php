@@ -14,6 +14,8 @@ class CreateBorrow extends CreateRecord
 {
     protected static string $resource = BorrowResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $borrow_date_return = Carbon::parse($data['borrow_date']);

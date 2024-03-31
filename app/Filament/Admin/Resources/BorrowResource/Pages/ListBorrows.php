@@ -21,15 +21,13 @@ class ListBorrows extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('ยืมอุปกรณ์'),
+                ->label('+ ยืมอุปกรณ์'),
         ];
     }
 
     public function getTabs(): array
     {
         return [
-            'ทั้งหมด' => Tab::make('All')
-                ->label('ทั้งหมด'),
             'รอดำเนินการ' => Tab::make()
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'pending'))
                 ->icon(BorrowStatus::Pending->getIcon())
@@ -55,6 +53,8 @@ class ListBorrows extends ListRecords
                 ->icon(BorrowStatus::Canceled->getIcon())
                 ->badge(Borrow::query()->where('status', 'canceled')->count())
                 ->badgeColor(BorrowStatus::Canceled->getColor()),
+            'ทั้งหมด' => Tab::make('All')
+                ->label('ทั้งหมด'),
         ];
     }
 }

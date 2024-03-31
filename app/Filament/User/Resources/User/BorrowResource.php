@@ -30,11 +30,15 @@ class BorrowResource extends Resource
 
     protected static ?string $modelLabel = 'รายการการยืม';
 
+    protected static ?int $navigationSort = 2;
+
     public static function form(Form $form): Form
     {
         return $form
         ->schema([
             Forms\Components\Section::make('กรอกข้อมูลเพื่อทำการยืม')
+            ->description('กรุณากรอกข้อมูลโปรไฟล์ก่อนทำรายการ เพื่อความสะดวกแก่เจ้าหน้าที่')
+            ->aside()
             ->schema([
                 Forms\Components\TextInput::make('borrow_number')
                     ->label('รหัสการยืม')
@@ -63,13 +67,6 @@ class BorrowResource extends Resource
                     ->disabled()
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('phone')
-                    ->label('เบอร์โทรศัพท์')
-                    ->formatStateUsing(fn () => auth()->user()->phone ?? '')
-                    ->tel()
-                    ->regex('/^0\d{8,9}$/')
-                    ->validationAttribute('เบอร์โทรศัพท์')
-                    ->required(),
                 Forms\Components\DatePicker::make('borrow_date')
                     ->label('วันที่ยืม')
                     ->seconds(false)
@@ -85,12 +82,26 @@ class BorrowResource extends Resource
                     ->disabled()
                     ->live(onBlur: true)
                     ->seconds(false),
+                Forms\Components\TextInput::make('name')
+                    ->label('ชื่อ-นามสกุล')
+                    ->formatStateUsing(fn () => auth()->user()->name ?? '')
+                    ->disabled()
+                    ->readOnly(),
+                Forms\Components\TextInput::make('phone')
+                    ->label('เบอร์โทรศัพท์')
+                    ->formatStateUsing(fn () => auth()->user()->phone ?? '')
+                    ->tel()
+                    ->regex('/^0\d{8,9}$/')
+                    ->validationAttribute('เบอร์โทรศัพท์')
+                    ->required(),
                 Forms\Components\Textarea::make('note')
                     ->label('หมายเหตุ')
                     ->columnSpan(2),
             ])->columns(2),
             Forms\Components\Section::make('ข้อมูลอุปกรณ์')
             ->id('product-information')
+            ->description('กรุณาเลือกอุปกรณ์ที่ต้องการยืม')
+            ->aside()
             ->schema([
                 Forms\Components\Repeater::make('borrowItems')
                     ->relationship()
@@ -121,8 +132,9 @@ class BorrowResource extends Resource
                                     ->get()
                                     ->pluck('name', 'id');
                             })
-                    ])
-            ])->columns(['lg' => 'full']),
+                    ])->addActionLabel('เพิ่มลงไปในหารยืม')
+                ])
+                ->columns(['lg' => 'full']),
         ]);
     }
 
@@ -135,6 +147,10 @@ class BorrowResource extends Resource
                     ->weight(FontWeight::Bold)
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('ผู้ยืม')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('borrowItems.productItem.product.name')
                     ->label('อุปกรณ์')
                     ->wrap()
@@ -144,10 +160,6 @@ class BorrowResource extends Resource
                     ->label('รหัสอุปกรณ์')
                     ->wrap()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label('เบอร์โทรศัพท์')
-                    ->searchable()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('borrow_date')
                     ->label('วันที่ยืม')
                     ->searchable()
@@ -156,6 +168,10 @@ class BorrowResource extends Resource
                 Tables\Columns\TextColumn::make('borrow_date_return')
                     ->label('กำหนดคืน')
                     ->dateTime('d/m/Y H:i')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('เบอร์โทรศัพท์')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')

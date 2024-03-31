@@ -149,7 +149,9 @@ class BorrowResource extends Resource
                             ->searchable()
                             ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                             ->required(),
-                    ])->columns(2)
+                    ])
+                    ->addActionLabel('เพิ่มลงไปในหารยืม')
+                    ->columns(2)
                     // ->disabled( fn ($context) => $context === 'edit' )
             ])->columns(['lg' => 'full']),
             Forms\Components\Section::make('สถานะการยืม')

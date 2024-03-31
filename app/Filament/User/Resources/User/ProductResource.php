@@ -24,6 +24,8 @@ class ProductResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-c-building-storefront';
 
+    protected static ?int $navigationSort = 1;
+
     public static function form(Form $form): Form
     {
         return $form
@@ -63,16 +65,16 @@ class ProductResource extends Resource
                     ->alignment(Alignment::Center)
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->label('สถานะ')
-                    ->sortable()
-                    ->alignment(Alignment::Center),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('สร้างเมื่อ')
-                    ->dateTime('d/m/Y H:i:s')
-                    ->searchable()
-                    ->sortable()
-                    ->alignment(Alignment::Center),
+                // Tables\Columns\TextColumn::make('status')
+                //     ->label('สถานะ')
+                //     ->sortable()
+                //     ->alignment(Alignment::Center),
+                // Tables\Columns\TextColumn::make('created_at')
+                //     ->label('สร้างเมื่อ')
+                //     ->dateTime('d/m/Y H:i:s')
+                //     ->searchable()
+                //     ->sortable()
+                //     ->alignment(Alignment::Center),
             ])
             ->filters([
                 //

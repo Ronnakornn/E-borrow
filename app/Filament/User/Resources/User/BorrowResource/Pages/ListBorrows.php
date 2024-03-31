@@ -5,6 +5,7 @@ namespace App\Filament\User\Resources\User\BorrowResource\Pages;
 use App\Filament\User\Resources\User\BorrowResource;
 use App\Models\Borrow;
 use App\Enums\BorrowStatus;
+use Closure;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
@@ -17,7 +18,7 @@ class ListBorrows extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('ยืมอุปกรณ์'),
+                ->label('+ ยืมอุปกรณ์'),
         ];
     }
 
@@ -30,22 +31,22 @@ class ListBorrows extends ListRecords
             'รอดำเนินการ' => Tab::make()
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'pending')->where('user_id', auth()->user()->id))
                 ->icon(BorrowStatus::Pending->getIcon())
-                ->badge(Borrow::query()->where('status', 'pending')->count())
+                ->badge(Borrow::query()->where('status', 'pending')->where('user_id', auth()->user()->id)->count())
                 ->badgeColor(BorrowStatus::Pending->getColor()),
             'ยืนยันการยืม' => Tab::make()
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'confirmed')->where('user_id', auth()->user()->id))
                 ->icon(BorrowStatus::Confirmed->getIcon())
-                ->badge(Borrow::query()->where('status', 'confirmed')->count())
+                ->badge(Borrow::query()->where('status', 'confirmed')->where('user_id', auth()->user()->id)->count())
                 ->badgeColor(BorrowStatus::Confirmed->getColor()),
             'คืนอุปกรณ์แล้ว' => Tab::make()
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'returned')->where('user_id', auth()->user()->id))
                 ->icon(BorrowStatus::Returned->getIcon())
-                ->badge(Borrow::query()->where('status', 'returned')->count())
+                ->badge(Borrow::query()->where('status', 'returned')->where('user_id', auth()->user()->id)->count())
                 ->badgeColor(BorrowStatus::Returned->getColor()),
             'ยกเลิกการยืม' => Tab::make()
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'canceled')->where('user_id', auth()->user()->id))
                 ->icon(BorrowStatus::Canceled->getIcon())
-                ->badge(Borrow::query()->where('status', 'canceled')->count())
+                ->badge(Borrow::query()->where('status', 'canceled')->where('user_id', auth()->user()->id)->count())
                 ->badgeColor(BorrowStatus::Canceled->getColor()),
         ];
     }
